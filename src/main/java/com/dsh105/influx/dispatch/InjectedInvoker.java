@@ -60,7 +60,14 @@ public class InjectedInvoker extends CommandInvoker {
                     ParameterBinding parameterBinding = controller.getCommandBinding().getBinding(i);
                     ContextualVariable variable = context.getVariable(parameterBinding.getBoundParameter());
                     if (variable == null) {
-                        throw new CommandInvocationException("Parameter binding requested an invalid variable: " + parameterBinding.getBoundParameter());
+                        if (!UnboundConverter.class.isAssignableFrom(parameterBinding.getBindingType())) {
+                            throw new CommandInvocationException("Parameter binding requested an invalid variable: " + parameterBinding.getBoundParameter());
+                        }
+                        try {
+                            parameters[i] = ((UnboundConverter) parameterBinding.getConverter().newInstance()).convert(context);
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            throw new CommandInvocationException("Failed to instantiate unbound converter (" + parameterBinding.getBindingType().getCanonicalName() + "): default constructor not available");
+                        }
                     }
 
                     if (methodParameter.isAssignableFrom(variable.getConsumedValue().getClass())) {
