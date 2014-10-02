@@ -23,6 +23,7 @@ import com.dsh105.influx.response.ResponseLevel;
 import com.dsh105.influx.syntax.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +39,8 @@ public class CommandContext<S> {
 
     private final Map<Range, String[]> argumentSets = new HashMap<>();
     private final Map<String, ContextualVariable> consumedVariables = new HashMap<>();
+
+    private final Map<Class<?>, Map<String, ?>> contextualValues = new HashMap<>();
 
     public CommandContext(InfluxManager<S> manager, Controller controller, S sender, ConsumedArgumentSet consumedArgumentSet) {
         this.manager = manager;
@@ -94,6 +97,32 @@ public class CommandContext<S> {
 
     public void respondAnonymously(String response, ResponseLevel level) {
         getManager().respondAnonymously(sender(), response, level);
+    }
+
+    private <V> void initialiseContextualType(Class<V> type) {
+        Map<String, V> map = (Map<String, V>) contextualValues.get(type);
+        if (map == null) {
+            map = new HashMap<>();
+            contextualValues.put(type, map);
+        }
+    }
+
+    public <V> void setContextualValue(String key, V value) {
+        initialiseContextualType(value.getClass());
+        Map<String, V> map = (Map<String, V>) contextualValues.get(value.getClass());
+        map.put(key, value);
+    }
+
+    public <V> Map<String, V> getContextualValues(Class<V> type) {
+        initialiseContextualType(type);
+        Map<String, V> map = (Map<String, V>) contextualValues.get(type);
+        return Collections.unmodifiableMap(map);
+    }
+
+    public <V> V getContextualValue(Class<V> type, String key) {
+        initialiseContextualType(type);
+        Map<String, V> map = (Map<String, V>) contextualValues.get(type);
+        return map.get(key);
     }
 
     @Deprecated // it uses a deprecated method

@@ -25,11 +25,11 @@ import java.util.regex.Pattern;
 
 public class ContextualVariable extends Variable {
 
-    private CommandContext context;
+    private CommandContext<?> context;
     private String[] value;
     private Matcher matcher;
 
-    public ContextualVariable(Variable variable, CommandContext context, String... consumedArguments) throws IllegalVerificationException {
+    public ContextualVariable(Variable variable, CommandContext<?> context, String... consumedArguments) throws IllegalVerificationException {
         super(variable.getName(), variable.getRange(), variable.getRegex(), variable.isOptional(), variable.isContinuous(), variable.getDefaultValue(), variable.getArgumentsAccepted());
         this.context = context;
         this.matcher = Pattern.compile(getRegex()).matcher(context.getInput());
@@ -40,7 +40,7 @@ public class ContextualVariable extends Variable {
         this.value = consumedArguments;
     }
 
-    public CommandContext getContext() {
+    public CommandContext<?> getContext() {
         return context;
     }
 
