@@ -3,7 +3,7 @@ Influx
 
 Welcome to **Influx** - the open source command management system, built to perform the heavy lifting behind **command syntax parsing** for you.
 
-Influx is the continuation of **[CommandManager v2.0][cmd-manager]**. For more information on how to port your old command handlers over to Influx, see the page on **[[porting from CommandManager]]**
+Influx is the continuation of **[CommandManager v2.0][cmd-manager]**. For more information on how to port your old command handlers over to Influx, see the page on **[porting from CommandManager][porting]**
 
 ## Quick Links
 
@@ -73,3 +73,4 @@ Influx can be added as a dependency by adding the following to your project's `p
 [jd]: http://jd.dsh105.com/Influx
 [wiki]: https://github.com/DSH105/Influx/
 [talk-to-us]: http://github.com/DSH105/Influx/wiki/talk-to-us/
+[porting]: http://github.com/DSH105/Influx/wiki/porting-from-commandmanager/
