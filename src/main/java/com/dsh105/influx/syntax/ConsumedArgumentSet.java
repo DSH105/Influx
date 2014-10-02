@@ -18,6 +18,7 @@
 package com.dsh105.influx.syntax;
 
 import com.dsh105.commodus.StringUtil;
+import com.dsh105.influx.util.ArgumentSplitter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class ConsumedArgumentSet {
 
     private Syntax candidate;
     private String input;
+    private String[] arguments;
 
     private List<Syntax> candidates = new ArrayList<>();
     private boolean matches;
@@ -36,6 +38,7 @@ public class ConsumedArgumentSet {
     public ConsumedArgumentSet(Syntax candidate, String input) {
         this.candidate = candidate;
         this.input = input;
+        this.arguments = new ArgumentSplitter(input).getArguments();
 
         this.candidates.add(candidate);
         if (candidate instanceof Command) {
@@ -55,6 +58,10 @@ public class ConsumedArgumentSet {
 
     public String getInput() {
         return input;
+    }
+
+    public String[] getArguments() {
+        return arguments;
     }
 
     public boolean matches() {
@@ -80,7 +87,6 @@ public class ConsumedArgumentSet {
     }
 
     private boolean compare(Syntax syntax) {
-        String[] inputArgs = input.split("\\s+");
         int syntaxLength = syntax.getSyntax().size();
         int nextParameter = 0;
 
@@ -91,7 +97,7 @@ public class ConsumedArgumentSet {
                 return false;
             }
 
-            if (i == syntaxLength - 1 && nextParameter < inputArgs.length - 1) {
+            if (i == syntaxLength - 1 && nextParameter < arguments.length - 1) {
                 // Final syntax parameter, but the input has more arguments
                 if (!parameter.isContinuous()) {
                     return false;
@@ -99,9 +105,9 @@ public class ConsumedArgumentSet {
             }
 
             try {
-                String arguments = inputArgs[nextParameter];
+                String arguments = this.arguments[nextParameter];
                 if (parameter instanceof Variable) {
-                    arguments = StringUtil.combineArray(nextParameter, nextParameter + ((Variable) parameter).getArgumentsAccepted(), " ", inputArgs);
+                    arguments = StringUtil.combineArray(nextParameter, nextParameter + ((Variable) parameter).getArgumentsAccepted(), " ", this.arguments);
                 }
 
                 if (!parameter.verify(arguments)) {
@@ -138,7 +144,8 @@ public class ConsumedArgumentSet {
             if (consumedArguments == null) {
                 return false;
             }
-            consume(parameter, consumedArguments.split("\\s+"));
+
+            consume(parameter, new ArgumentSplitter(consumedArguments).getArguments());
         }
 
         return true;

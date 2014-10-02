@@ -44,7 +44,7 @@ public class CommandContext<S> {
         this.controller = controller;
         this.consumedArgumentSet = consumedArgumentSet;
         this.input = consumedArgumentSet.getInput();
-        this.arguments = input.split("\\s+");
+        this.arguments = consumedArgumentSet.getArguments();
         this.sender = sender;
     }
 

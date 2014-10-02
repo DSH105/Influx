@@ -19,6 +19,7 @@ package com.dsh105.influx.syntax;
 
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
+import com.dsh105.influx.util.ArgumentSplitter;
 
 import java.util.*;
 
@@ -26,13 +27,15 @@ public class FuzzyArgumentMatcher {
 
     private InfluxManager<?> manager;
     private String input;
-    private SortedMap<Controller, SortedSet<Syntax>> candidates = new TreeMap<>();
+    private String[] arguments;
 
+    private SortedMap<Controller, SortedSet<Syntax>> candidates = new TreeMap<>();
     private SortedMap<Integer, SortedSet<Controller>> possibleMatches = new TreeMap<>();
 
     public FuzzyArgumentMatcher(InfluxManager<?> manager, String input) {
         this.manager = manager;
         this.input = input;
+        this.arguments = new ArgumentSplitter(input).getArguments();
 
         this.possibleMatches.put(0, new TreeSet<Controller>());
         for (Controller controller : manager.getMappedCommands()) {
@@ -70,7 +73,6 @@ public class FuzzyArgumentMatcher {
 
         controllerIter: for (Controller controller : candidates.keySet()) {
             for (Syntax syntax : candidates.get(controller)) {
-                String[] inputArgs = input.split("\\s+");
                 int syntaxLength = syntax.getSyntax().size();
                 for (int i = 0; i < syntaxLength; i++) {
                     Parameter parameter = syntax.getParameter(i, false);
@@ -85,8 +87,8 @@ public class FuzzyArgumentMatcher {
                     }
 
                     try {
-                        String arg = inputArgs[i];
-                        if (i == inputArgs.length - 1) {
+                        String arg = arguments[i];
+                        if (i == arguments.length - 1) {
                             if (arg.toLowerCase().startsWith(parameter.getName().toLowerCase())) {
                                 possibleMatch(i, controller);
                             }
