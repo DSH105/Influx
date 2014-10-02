@@ -48,12 +48,27 @@ public class Range {
         return getEndIndex() - getStartIndex();
     }
 
-    public boolean before(Range range) {
+    public boolean isBefore(Range range) {
         return getStartIndex() < range.getStartIndex();
     }
 
-    public boolean after(Range range) {
+    public boolean isAfter(Range range) {
         return getStartIndex() > range.getStartIndex();
+    }
+
+    @Override
+    public String toString() {
+        return "Range{" +
+                "startIndex=" + startIndex +
+                ", endIndex=" + endIndex +
+                "}";
+    }
+
+    @Override
+    public int hashCode() {
+        int result = startIndex;
+        result = 31 * result + endIndex;
+        return result;
     }
 
     @Override

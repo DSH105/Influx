@@ -17,103 +17,137 @@
 
 package com.dsh105.influx;
 
-import com.dsh105.influx.annotation.Nest;
-import com.dsh105.influx.annotation.Restrict;
-import com.dsh105.influx.registration.RegistrationStrategy;
-import com.dsh105.influx.registration.Registry;
-import com.dsh105.influx.syntax.Command;
-
 import java.lang.reflect.Method;
 import java.util.*;
 
-public abstract class CommandMapping implements Mapping {
+public abstract class CommandMapping implements InfluxMapping {
 
     private final Map<CommandListener, TreeSet<Controller>> commands = new HashMap<>();
 
-    public abstract Registry getRegistry();
-
     @Override
-    public Set<Controller> getMappedCommands() {
-        Set<Controller> mapped = new HashSet<>();
+    public SortedSet<Controller> getMappedCommands() {
+        SortedSet<Controller> mapped = new TreeSet<>();
         for (Set<Controller> commandSet : commands.values()) {
             mapped.addAll(commandSet);
         }
-        return Collections.unmodifiableSet(mapped);
+        return Collections.unmodifiableSortedSet(mapped);
     }
 
     @Override
-    public Set<Controller> getMappedCommands(CommandListener listener) {
-        return Collections.unmodifiableSet(commands.get(listener));
+    public SortedSet<Controller> getMappedCommands(CommandListener listener) {
+        return Collections.unmodifiableSortedSet(commands.get(listener));
     }
 
     @Override
-    public void register(CommandListener listener, String... parentNests) {
-        for (Method method : listener.getClass().getDeclaredMethods()) {
+    public boolean exists(Controller controller) {
+        return getMappedCommands().contains(controller);
+    }
+
+    @Override
+    public Set<CommandListener> getRegisteredListeners() {
+        return Collections.unmodifiableSet(commands.keySet());
+    }
+
+    @Override
+    public boolean exists(CommandListener listener) {
+        return getRegisteredListeners().contains(listener);
+    }
+
+    @Override
+    public List<Controller> register(CommandListener listener, String... parentNests) {
+        return nestCommandsIn(listener, listener, false, parentNests);
+    }
+
+    @Override
+    public Controller register(CommandBuilder builder, String... parentNests) {
+        return nestCommandIn(builder.getOriginListener(), builder, parentNests);
+    }
+
+    @Override
+    public List<Controller> nestCommandsIn(CommandListener destination, CommandListener origin, String... parentNests) {
+        return nestCommandsIn(destination, origin, true, parentNests);
+    }
+
+    @Override
+    public List<Controller> nestCommandsIn(CommandListener destination, CommandListener origin, boolean onlyAnnotatedNests, String... parentNests) {
+        List<Controller> registered = new ArrayList<>();
+        for (Method method : origin.getClass().getDeclaredMethods()) {
             CommandBuilder builder;
             try {
-                builder = new CommandBuilder().from(listener, method.getName());
-            } catch (InvalidCommandException e) {
+                builder = new CommandBuilder().from(origin, method);
+            } catch (IllegalCommandException e) {
                 // Not a command, ignore it
                 continue;
             }
 
-            if (builder.isNested) {
-                // Skip it here - dealt with later
+            if (onlyAnnotatedNests && !builder.nested) {
                 continue;
             }
 
-            register(builder, parentNests);
+            CommandNest nest = new CommandNest(destination, builder, parentNests);
+            builder.restrict(nest.getPermissions().toArray(new String[0]));
+            Controller controller = register(builder, nest.getParents().toArray(new String[0]));
+            if (controller != null) {
+                registered.add(controller);
+            }
         }
-
-        nestCommandsIn(listener, listener, true, parentNests);
+        return Collections.unmodifiableList(registered);
     }
 
     @Override
-    public void register(CommandBuilder builder, String... parentNests) {
-        Controller controller = builder.build();
-        controller.getCommand().nestUnder(parentNests);
-        TreeSet<Controller> mappedCommands = commands.get(controller.getCommand().getListener());
+    public Controller nestCommandIn(CommandListener destination, CommandBuilder builder, String... parentNests) {
+        Controller controller;
+        try {
+            controller = builder.build(destination, parentNests);
+        } catch (IllegalCommandException e) {
+            throw new IllegalArgumentException("Illegal command syntax provided.", e);
+        }
+        if (!getSenderType().isAssignableFrom(controller.getCommand().getAcceptedSenderType())) {
+            throw new IllegalArgumentException("Manager can only have commands accepting the following generic type: " + getSenderType().getSimpleName() + " (not " + controller.getCommand().getAcceptedSenderType() + ")");
+        }
+
+        TreeSet<Controller> mappedCommands = commands.get(controller.getRegisteredListener());
         if (mappedCommands == null) {
             mappedCommands = new TreeSet<>();
         }
 
-        mappedCommands.add(controller);
-        commands.put(builder.getListener(), mappedCommands);
-        getRegistry().register(controller);
+        if (mappedCommands.add(controller)) {
+            commands.put(controller.getRegisteredListener(), mappedCommands);
+            getRegistry().register(controller);
+            return controller;
+        }
+        return null;
     }
 
     @Override
-    public void nestCommandsIn(CommandListener destination, CommandListener origin, String... parentNests) {
-        nestCommandsIn(destination, origin, true, parentNests);
-    }
-
-    @Override
-    public void nestCommandsIn(CommandListener destination, CommandListener origin, boolean onlyAnnotatedNests, String... parentNests) {
-
-    }
-
-    @Override
-    public void unregister(CommandListener listener) {
+    public List<Controller> unregister(CommandListener listener) {
+        List<Controller> unregistered = new ArrayList<>();
         TreeSet<Controller> mappedCommands = commands.get(listener);
         if (mappedCommands == null) {
-            return;
+            return unregistered;
         }
 
         commands.remove(listener);
         for (Controller controller : mappedCommands) {
             getRegistry().unregister(controller);
+            unregistered.add(controller);
         }
+        return Collections.unmodifiableList(unregistered);
     }
 
     @Override
-    public void unregister(Controller controller) {
-        TreeSet<Controller> mappedCommands = commands.get(controller.getCommand().getListener());
+    public boolean unregister(Controller controller) {
+        TreeSet<Controller> mappedCommands = commands.get(controller.getRegisteredListener());
         if (mappedCommands == null) {
-            return;
+            return false;
         }
-        mappedCommands.remove(controller);
-        getRegistry().unregister(controller);
-        commands.put(controller.getCommand().getListener(), mappedCommands);
+        if (mappedCommands.contains(controller)) {
+            mappedCommands.remove(controller);
+            getRegistry().unregister(controller);
+            commands.put(controller.getRegisteredListener(), mappedCommands);
+            return true;
+        }
+        return false;
     }
 
     @Override

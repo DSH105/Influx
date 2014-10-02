@@ -17,40 +17,35 @@
 
 package com.dsh105.influx;
 
-import com.dsh105.influx.annotation.Accept;
-import com.dsh105.influx.annotation.Convert;
+import com.dsh105.influx.annotation.Authorize;
 import com.dsh105.influx.annotation.Nested;
-import com.dsh105.influx.annotation.Restrict;
-import com.dsh105.influx.dispatch.CommandCallable;
-import com.dsh105.influx.dispatch.PreparedCallable;
+import com.dsh105.influx.annotation.Priority;
+import com.dsh105.influx.dispatch.CommandInvoker;
+import com.dsh105.influx.dispatch.InjectedInvoker;
+import com.dsh105.influx.syntax.AnnotatedCommandBinding;
 import com.dsh105.influx.syntax.Command;
 import com.dsh105.influx.syntax.CommandBinding;
-import com.dsh105.influx.syntax.Syntax;
-import com.dsh105.influx.syntax.WrappedCommandMethod;
+import com.dsh105.influx.syntax.IllegalSyntaxException;
+import com.dsh105.influx.util.GeneralUtil;
 import com.google.common.base.Preconditions;
-import org.bukkit.command.CommandSender;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class CommandBuilder {
 
-    private CommandListener listener;
+    private CommandListener originListener;
     private String syntax;
     private String shortDescription;
     private String[] longDescription = new String[0];
     private String[] usage = new String[0];
-    private Accept.Behaviour acceptance = Accept.Behaviour.ALL;
-    private CommandCallable commandCallable = new PreparedCallable();
+    private Priority.Type priority = Priority.Type.NORMAL;
+    private CommandInvoker commandInvoker = new InjectedInvoker();
     private CommandBinding commandBinding;
-    private List<String> aliases = new ArrayList<>();
-    private List<String> permissions = new ArrayList<>();
+    private Set<String> aliases = new HashSet<>();
+    private Set<String> permissions = new HashSet<>();
 
-    protected boolean isNested;
+    protected boolean nested;
 
     public CommandBuilder from(com.dsh105.influx.annotation.Command commandAnnotation) {
         this.syntax(commandAnnotation.syntax());
@@ -60,26 +55,38 @@ public class CommandBuilder {
         return this;
     }
 
-    public CommandBuilder from(CommandListener listener, String methodName) {
+    public CommandBuilder from(CommandListener listener, Method method) throws IllegalCommandException {
+        return from(listener, method.getName(), method.getParameterTypes());
+    }
+
+    public CommandBuilder from(CommandListener listener, String methodName, Class<?>... parameterTypes) throws IllegalCommandException {
         Preconditions.checkNotNull(listener, "Listener must not be null.");
         Preconditions.checkNotNull(methodName, "Method name must not be null.");
-        this.listener = listener;
-        this.commandBinding = new WrappedCommandMethod(listener, methodName);
 
+        this.originListener = listener;
+        this.commandBinding = new AnnotatedCommandBinding(this.originListener, methodName, parameterTypes);
         Method method = commandBinding.getCallableMethod();
 
-        if (method.isAnnotationPresent(com.dsh105.influx.annotation.Command.class)) {
-            throw new InvalidCommandException("@Command annotation not present on " + listener.getClass().getSimpleName() + "#" + methodName + "");
+        this.nested = method.isAnnotationPresent(Nested.class);
+
+        if (!method.isAnnotationPresent(com.dsh105.influx.annotation.Command.class)) {
+            throw new IllegalCommandException("@Command annotation not present on " + listener.getClass().getSimpleName() + "#" + methodName + "");
         }
 
         from(method.getAnnotation(com.dsh105.influx.annotation.Command.class));
-        isNested = method.isAnnotationPresent(Nested.class);
-        if (method.isAnnotationPresent(Accept.class)) {
-            accept(method.getAnnotation(Accept.class).value());
+        if (method.isAnnotationPresent(Authorize.class)) {
+            restrict(method.getAnnotation(Authorize.class).value());
         }
-        if (method.isAnnotationPresent(Restrict.class)) {
-            restrict(method.getAnnotation(Restrict.class).value());
+        if (method.isAnnotationPresent(Priority.class)) {
+            prioritise(method.getAnnotation(Priority.class).value());
         }
+
+        return this;
+    }
+
+    public CommandBuilder syntax(String syntax) {
+        Preconditions.checkNotNull(syntax, "Syntax must not be null.");
+        this.syntax = syntax.trim();
         return this;
     }
 
@@ -95,15 +102,9 @@ public class CommandBuilder {
         return this;
     }
 
-    public CommandBuilder accept(Accept.Behaviour acceptance) {
-        Preconditions.checkNotNull(acceptance, "Command acceptance must not be null.");
-        this.acceptance = acceptance;
-        return this;
-    }
-
-    public CommandBuilder syntax(String syntax) {
-        Preconditions.checkNotNull(syntax, "Syntax must not be null.");
-        this.syntax = syntax.trim();
+    public CommandBuilder prioritise(Priority.Type priority) {
+        Preconditions.checkNotNull(priority, "Priority must not be null.");
+        this.priority = priority;
         return this;
     }
 
@@ -121,14 +122,14 @@ public class CommandBuilder {
         return this;
     }
 
-    public CommandBuilder callUsing(CommandCallable commandCallable) {
-        Preconditions.checkNotNull(commandCallable, "Command callable name must not be null.");
-        this.commandCallable = commandCallable;
+    public CommandBuilder callUsing(CommandInvoker commandInvoker) {
+        Preconditions.checkNotNull(commandInvoker, "Command invoker must not be null.");
+        this.commandInvoker = commandInvoker;
         return this;
     }
 
-    public CommandListener getListener() {
-        return listener;
+    public CommandListener getOriginListener() {
+        return originListener;
     }
 
     public String getSyntax() {
@@ -147,61 +148,54 @@ public class CommandBuilder {
         return usage;
     }
 
-    public Accept.Behaviour getAcceptance() {
-        return acceptance;
+    public Priority.Type getPriority() {
+        return priority;
     }
 
-    public CommandCallable getCommandCallable() {
-        return commandCallable;
+    public Set<String> getAliases() {
+        return Collections.unmodifiableSet(aliases);
+    }
+
+    public Set<String> getPermissions() {
+        return Collections.unmodifiableSet(permissions);
+    }
+
+    public CommandInvoker getCommandInvoker() {
+        return commandInvoker;
     }
 
     public CommandBinding getCommandBinding() {
         return commandBinding;
     }
 
-    public List<String> getAliases() {
-        return Collections.unmodifiableList(aliases);
+    public Controller build() throws IllegalCommandException {
+        return build(getOriginListener());
     }
 
-    public List<String> getPermissions() {
-        return Collections.unmodifiableList(permissions);
-    }
-
-    public Controller build() {
-        Preconditions.checkNotNull(listener, "Command has not been bound to a listener.");
+    public Controller build(CommandListener destinationListener) throws IllegalCommandException {
+        Preconditions.checkNotNull(originListener, "Command has not been bound to a originListener.");
         Preconditions.checkNotNull(syntax, "Valid syntax has not been provided.");
         Preconditions.checkNotNull(shortDescription, "Description has not been provided");
-        Preconditions.checkNotNull(commandBinding, "Command has not been bound to a method or listener.");
+        Preconditions.checkNotNull(commandBinding, "Command has not been bound to a method or originListener.");
         Description description = new Description(shortDescription, longDescription, usage);
-        Command command = new Command(listener, getSenderType(commandBinding.getCallableMethod()), syntax, commandBinding, permissions, acceptance, aliases);
-        return new Controller(command, description, commandBinding, commandCallable);
-    }
-
-    public Controller build(String... parents) {
-        Preconditions.checkNotNull(parents, "Parent must not be null.");
-        Controller controller = build();
-        controller.getCommand().nestUnder(parents);
-        return controller;
-    }
-
-    private Class<? extends CommandSender> getSenderType(Method method) {
-        Type[] genericParameterTypes = method.getGenericParameterTypes();
-        for (Type genericType : genericParameterTypes) {
-            if (genericType instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) genericType;
-                Type[] paramArgTypes = parameterizedType.getActualTypeArguments();
-                for (Type paramArgType : paramArgTypes) {
-                    if (paramArgType != null) {
-                        try {
-                            return (Class<? extends CommandSender>) paramArgType;
-                        } catch (ClassCastException e) {
-                            // Unlikely...
-                            throw new InvalidCommandException("Command parameter type is invalid - must extend CommandSender.", e);
-                        }
-                    }
-                }
-            }
+        Command command = null;
+        try {
+            command = new Command(originListener, GeneralUtil.getSenderTypeFor(commandBinding.getCallableMethod()), syntax, commandBinding, permissions, priority, aliases);
+        } catch (IllegalSyntaxException e) {
+            throw new IllegalCommandException("Invalid command syntax provided.", e);
         }
-        return CommandSender.class;
+        return new Controller(destinationListener, command, description, commandBinding, commandInvoker);
+    }
+
+    public Controller build(String... parents) throws IllegalCommandException {
+        return build(getOriginListener(), parents);
+    }
+
+    public Controller build(CommandListener destinationListener, String... parents) throws IllegalCommandException {
+        Controller controller = build(destinationListener);
+        if (parents != null) {
+            controller.getCommand().nestUnder(parents);
+        }
+        return controller;
     }
 }

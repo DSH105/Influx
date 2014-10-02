@@ -17,27 +17,29 @@
 
 package com.dsh105.influx.registration.bukkit;
 
-import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.Description;
-import com.dsh105.influx.Manager;
+import com.dsh105.influx.InfluxBukkitManager;
+import com.dsh105.influx.InfluxManager;
+import com.dsh105.influx.dispatch.BukkitDispatcher;
 import com.dsh105.influx.dispatch.Dispatcher;
 import com.dsh105.influx.syntax.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
 
+import java.util.ArrayList;
+
 public class InfluxCommand extends org.bukkit.command.Command implements PluginIdentifiableCommand {
 
-    private final Manager manager;
+    private final InfluxBukkitManager manager;
 
-    public InfluxCommand(Manager manager, Controller controller) {
+    public InfluxCommand(InfluxBukkitManager manager, Controller controller) {
         this(manager, controller.getCommand(), controller.getDescription());
     }
 
-    public InfluxCommand(Manager manager, Command command, Description description) {
-        super(command.getCommandName(), description.getShortDescription(), description.getUsage()[0], command.getStringAliases());
+    public InfluxCommand(InfluxBukkitManager manager, Command command, Description description) {
+        super(command.getCommandName(), description.getShortDescription(), description.getUsage()[0], new ArrayList<>(command.getAliasNames()));
         this.manager = manager;
     }
 
@@ -46,11 +48,11 @@ public class InfluxCommand extends org.bukkit.command.Command implements PluginI
         return getPlugin().isEnabled() && getExecutor().onCommand(sender, this, commandLabel, args);
     }
 
-    public Manager getManager() {
+    public InfluxBukkitManager getManager() {
         return manager;
     }
 
-    public Dispatcher getExecutor() {
+    public BukkitDispatcher getExecutor() {
         return manager.getDispatcher();
     }
 

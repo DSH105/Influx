@@ -17,29 +17,37 @@
 
 package com.dsh105.influx;
 
-import com.dsh105.influx.dispatch.CommandCallable;
-import com.dsh105.influx.dispatch.PreparedCallable;
+import com.dsh105.influx.dispatch.CommandInvoker;
+import com.dsh105.influx.dispatch.InjectedInvoker;
 import com.dsh105.influx.syntax.CommandBinding;
-import com.dsh105.influx.syntax.WrappedCommandMethod;
 import com.dsh105.influx.syntax.Command;
 
+/**
+ * Note: this class has a natural ordering that is inconsistent with equals.
+ */
 public class Controller implements Comparable<Controller> {
 
+    private CommandListener registeredListener;
     private Command command;
     private Description description;
 
     private CommandBinding commandBinding;
-    private CommandCallable callable;
+    private CommandInvoker commandInvoker;
 
-    public Controller(Command command, Description description, CommandBinding commandBinding) {
-        this(command, description, commandBinding, null);
+    public Controller(CommandListener registeredListener, Command command, Description description, CommandBinding commandBinding) {
+        this(registeredListener, command, description, commandBinding, null);
     }
 
-    public Controller(Command command, Description description, CommandBinding commandBinding, CommandCallable callable) {
+    public Controller(CommandListener registeredListener, Command command, Description description, CommandBinding commandBinding, CommandInvoker commandInvoker) {
+        this.registeredListener = registeredListener;
         this.command = command;
         this.description = description;
         this.commandBinding = commandBinding;
-        this.callable = callable != null ? callable : new PreparedCallable();
+        this.commandInvoker = commandInvoker != null ? commandInvoker : new InjectedInvoker();
+    }
+
+    public CommandListener getRegisteredListener() {
+        return registeredListener;
     }
 
     public Command getCommand() {
@@ -54,16 +62,45 @@ public class Controller implements Comparable<Controller> {
         return commandBinding;
     }
 
-    public CommandCallable getCallable() {
-        return callable;
-    }
-
-    public boolean matches(String input) {
-        return getCommand().matches(input);
+    public CommandInvoker getCommandInvoker() {
+        return commandInvoker;
     }
 
     @Override
     public int compareTo(Controller controller) {
         return getCommand().compareTo(controller.getCommand());
+    }
+
+    @Override
+    public String toString() {
+        return "Controller{" +
+                "registeredListener=" + registeredListener +
+                ", command=" + command +
+                ", description=" + description +
+                "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Controller)) return false;
+
+        Controller that = (Controller) o;
+
+        if (!commandInvoker.equals(that.commandInvoker)) return false;
+        if (!command.equals(that.command)) return false;
+        if (!commandBinding.equals(that.commandBinding)) return false;
+        if (!description.equals(that.description)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = command.hashCode();
+        result = 31 * result + description.hashCode();
+        result = 31 * result + commandBinding.hashCode();
+        result = 31 * result + commandInvoker.hashCode();
+        return result;
     }
 }

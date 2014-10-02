@@ -1,0 +1,113 @@
+/*
+ * This file is part of Influx.
+ *
+ * Influx is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Influx is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Influx.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.dsh105.influx.syntax;
+
+import com.dsh105.influx.Controller;
+import com.dsh105.influx.InfluxManager;
+
+import java.util.*;
+
+public class FuzzyArgumentMatcher {
+
+    private InfluxManager<?> manager;
+    private String input;
+    private SortedMap<Controller, SortedSet<Syntax>> candidates = new TreeMap<>();
+
+    private SortedMap<Integer, SortedSet<Controller>> possibleMatches = new TreeMap<>();
+
+    public FuzzyArgumentMatcher(InfluxManager<?> manager, String input) {
+        this.manager = manager;
+        this.input = input;
+
+        this.possibleMatches.put(0, new TreeSet<Controller>());
+        for (Controller controller : manager.getMappedCommands()) {
+            SortedSet<Syntax> set = new TreeSet<>();
+            set.add(controller.getCommand());
+            set.addAll(controller.getCommand().getAliases());
+            candidates.put(controller, set);
+        }
+
+        compareFuzzily();
+    }
+
+    public InfluxManager<?> getManager() {
+        return manager;
+    }
+
+    public String getInput() {
+        return input;
+    }
+
+    public SortedSet<Controller> getAllPossibleMatches() {
+        SortedSet<Controller> possibleMatches = new TreeSet<>();
+        for (SortedSet<Controller> set : this.possibleMatches.values()) {
+            possibleMatches.addAll(set);
+        }
+        return Collections.unmodifiableSortedSet(possibleMatches);
+    }
+
+    public SortedSet<Controller> getHighestPossibleMatches() {
+        return Collections.unmodifiableSortedSet(this.possibleMatches.get(this.possibleMatches.lastKey()));
+    }
+
+    private void compareFuzzily() {
+        // Only compares parameters, not variables
+
+        controllerIter: for (Controller controller : candidates.keySet()) {
+            for (Syntax syntax : candidates.get(controller)) {
+                String[] inputArgs = input.split("\\s+");
+                int syntaxLength = syntax.getSyntax().size();
+                for (int i = 0; i < syntaxLength; i++) {
+                    Parameter parameter = syntax.getParameter(i, false);
+                    if (parameter == null) {
+                        continue controllerIter;
+                    }
+
+                    if (parameter instanceof Variable) {
+                        // Syntax requires more
+                        possibleMatch(i, controller);
+                        continue controllerIter;
+                    }
+
+                    try {
+                        String arg = inputArgs[i];
+                        if (i == inputArgs.length - 1) {
+                            if (arg.toLowerCase().startsWith(parameter.getName().toLowerCase())) {
+                                possibleMatch(i, controller);
+                            }
+                        } else if (parameter.verify(arg)) {
+                            possibleMatch(i, controller);
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        possibleMatch(i, controller);
+                    }
+
+                }
+            }
+        }
+    }
+
+    private void possibleMatch(int index, Controller candidate) {
+        SortedSet<Controller> candidates = possibleMatches.get(index);
+        if (candidates == null) {
+            candidates = new TreeSet<>();
+        }
+        candidates.add(candidate);
+        possibleMatches.put(index, candidates);
+    }
+}

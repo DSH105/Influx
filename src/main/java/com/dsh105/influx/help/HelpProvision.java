@@ -18,17 +18,28 @@
 package com.dsh105.influx.help;
 
 import com.dsh105.commodus.reflection.Reflection;
+import com.dsh105.influx.InfluxBukkitManager;
+import com.dsh105.influx.InfluxManager;
+import org.bukkit.command.CommandSender;
 
 public enum HelpProvision {
 
-    NONE,
     CONDENSED,
-    PAGINATED,
+    EXPANDED,
+    BUKKIT_CONDENSED,
     BUKKIT;
 
-    public HelpProvider newProvider() {
-        String name = name().toLowerCase().replace("_", "");
-        String className = getClass().getCanonicalName().replace(getClass().getSimpleName(), name);
-        return (HelpProvider) Reflection.newInstance(Reflection.getConstructor(Reflection.getClass(className)));
+    public HelpProvider newProvider(InfluxManager<?> manager) {
+        switch (this) {
+            case EXPANDED:
+                return new ExpandedHelpProvider<>(manager, this);
+            case BUKKIT: case BUKKIT_CONDENSED:
+                if (manager instanceof InfluxBukkitManager) {
+                    return new BukkitHelpProvider<>((InfluxBukkitManager) manager, this);
+                }
+                throw new IllegalStateException("Bukkit help provision can only be enabled for an InfluxBukkitManager");
+            default:
+                return new DefaultHelpProvider<>(manager, this);
+        }
     }
 }

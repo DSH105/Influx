@@ -17,6 +17,8 @@
 
 package com.dsh105.influx;
 
+import java.util.Arrays;
+
 public class Description {
 
     private String shortDescription;
@@ -47,5 +49,36 @@ public class Description {
         }
 
         return getUsage()[0];
+    }
+
+    @Override
+    public String toString() {
+        return "Description{" +
+                "shortDescription='" + shortDescription + "'" +
+                ", longDescription=" + Arrays.toString(longDescription) +
+                ", usage=" + Arrays.toString(usage) +
+                "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Description)) return false;
+
+        Description that = (Description) o;
+
+        if (!Arrays.equals(longDescription, that.longDescription)) return false;
+        if (!shortDescription.equals(that.shortDescription)) return false;
+        if (!Arrays.equals(usage, that.usage)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = shortDescription.hashCode();
+        result = 31 * result + Arrays.hashCode(longDescription);
+        result = 31 * result + Arrays.hashCode(usage);
+        return result;
     }
 }

@@ -18,28 +18,56 @@
 package com.dsh105.influx.registration;
 
 import com.dsh105.influx.Controller;
-import com.dsh105.influx.Manager;
-import com.dsh105.influx.registration.bukkit.InfluxCommand;
-import org.bukkit.command.CommandMap;
+import com.dsh105.influx.InfluxManager;
+import com.google.common.base.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-public interface Registry {
+public class Registry {
 
-    Manager getManager();
+    private final ArrayList<String> registeredCommands = new ArrayList<>();
+    private InfluxManager<?> manager;
 
-    List<String> getRegisteredCommands();
+    protected Registry(InfluxManager<?> manager) {
+        this.manager = manager;
+    }
 
-    void register(Collection<Controller> queue);
+    public InfluxManager<?> getManager() {
+        return manager;
+    }
 
-    void register(Controller... controllers);
+    public List<String> getRegisteredCommands() {
+        return Collections.unmodifiableList(registeredCommands);
+    }
 
-    void register(InfluxCommand command);
+    public void register(Collection<Controller> queue) {
+        for (Controller controller : queue) {
+            if (controller != null) {
+                register(controller);
+            }
+        }
+    }
 
-    void unregister(Controller controller);
+    public boolean register(Controller controller) {
+        Preconditions.checkNotNull(controller, "Controller must not be null.");
+        return !registeredCommands.contains(controller.getCommand().getCommandName()) && registeredCommands.add(controller.getCommand().getCommandName());
+    }
 
-    void unregister(InfluxCommand command);
+    public boolean unregister(Controller controller) {
+        return unregister(controller.getCommand().getCommandName());
+    }
 
-    void unregister(String command);
+    public boolean unregister(String command) {
+        return registeredCommands.remove(command);
+    }
+
+    public void unregisterAll() {
+        ArrayList<String> copy = new ArrayList<>(getRegisteredCommands());
+        for (String command : copy) {
+            unregister(command);
+        }
+    }
 }

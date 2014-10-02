@@ -17,19 +17,28 @@
 
 package com.dsh105.influx.registration;
 
-import com.dsh105.influx.Manager;
+import com.dsh105.influx.InfluxBukkitManager;
+import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.registration.bukkit.BukkitRegistry;
 
 public enum RegistrationStrategy {
 
     NONE, BUKKIT;
 
-    public Registry prepare(Manager manager) {
+    public Registry prepare(InfluxManager<?> manager) {
+        Registry registry;
         switch (this) {
             case BUKKIT:
-                return new BukkitRegistry(manager);
+                if (manager instanceof InfluxBukkitManager) {
+                    registry = new BukkitRegistry((InfluxBukkitManager) manager);
+                    break;
+                }
+                throw new IllegalStateException("Bukkit command registration can only be enabled for an InfluxBukkitManager");
             default:
-                return new DefaultRegistry(manager);
+                registry = new Registry(manager);
+                break;
         }
+        registry.register(manager.getMappedCommands());
+        return registry;
     }
 }

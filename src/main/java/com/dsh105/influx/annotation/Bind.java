@@ -17,9 +17,6 @@
 
 package com.dsh105.influx.annotation;
 
-import com.dsh105.influx.converter.Converter;
-import com.dsh105.influx.converter.Converters;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

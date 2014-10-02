@@ -21,15 +21,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Comparator;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target(ElementType.PARAMETER)
 public @interface Accept {
 
-    public Behaviour value();
+    public int value();
 
-    public enum Behaviour {
-        ALL, PER_PARAMETER
-    }
+    public String showAs() default "";
 }

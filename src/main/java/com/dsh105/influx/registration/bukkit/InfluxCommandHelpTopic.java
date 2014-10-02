@@ -31,10 +31,10 @@ public class InfluxCommandHelpTopic extends HelpTopic {
     public InfluxCommandHelpTopic(InfluxCommand command) {
         this.command = command;
 
-        if (command.getLabel().startsWith("/")) {
+        if (command.getLabel().startsWith(command.getManager().getCommandPrefix())) {
             name = command.getLabel();
         } else {
-            name = "/" + command.getLabel();
+            name = command.getManager().getCommandPrefix() + command.getLabel();
         }
 
         String description = command.getDescription();

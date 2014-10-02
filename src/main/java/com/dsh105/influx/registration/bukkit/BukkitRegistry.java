@@ -19,38 +19,35 @@ package com.dsh105.influx.registration.bukkit;
 
 import com.dsh105.commodus.reflection.Reflection;
 import com.dsh105.influx.Controller;
-import com.dsh105.influx.Manager;
-import com.dsh105.influx.registration.DefaultRegistry;
+import com.dsh105.influx.InfluxBukkitManager;
 import com.dsh105.influx.registration.Registry;
+import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
-public class BukkitRegistry extends DefaultRegistry {
+public class BukkitRegistry extends Registry {
 
     static {
         Bukkit.getHelpMap().registerHelpTopicFactory(InfluxCommand.class, new InfluxCommandHelpTopicFactory());
     }
 
-    private static Field SERVER_COMMAND_MAP = Reflection.getField(Bukkit.getServer().getPluginManager().getClass(), "commandMap");
-
-    private final ArrayList<String> REGISTERED_COMMANDS = new ArrayList<>();
+    private static Field SERVER_COMMAND_MAP;
 
     private CommandMap commandMap;
 
-    public BukkitRegistry(Manager manager) {
+    public BukkitRegistry(InfluxBukkitManager manager) {
         super(manager);
     }
 
     public CommandMap getCommandMap() {
         if (commandMap == null) {
             try {
+                if (SERVER_COMMAND_MAP == null) {
+                    SERVER_COMMAND_MAP = Reflection.getField(Bukkit.getServer().getPluginManager().getClass(), "commandMap");
+                }
                 commandMap = (CommandMap) SERVER_COMMAND_MAP.get(Bukkit.getPluginManager());
             } catch (Exception e) {
                 getManager().getPlugin().getLogger().warning("Failed to retrieve CommandMap! Using fallback instead...");
@@ -64,45 +61,36 @@ public class BukkitRegistry extends DefaultRegistry {
     }
 
     @Override
-    public List<String> getRegisteredCommands() {
-        return Collections.unmodifiableList(REGISTERED_COMMANDS);
+    public InfluxBukkitManager getManager() {
+        return (InfluxBukkitManager) super.getManager();
     }
 
     @Override
-    public void register(Collection<Controller> queue) {
-        if (!queue.isEmpty()) {
-            for (Controller controller : queue) {
-                register(new InfluxCommand(getManager(), controller));
+    public boolean register(Controller controller) {
+        return super.register(controller) && register(new InfluxCommand(getManager(), controller));
+    }
+
+    public boolean register(InfluxCommand command) {
+        if (!getCommandMap().register(getManager().getPlugin().getName(), command)) {
+            unregister(command);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean unregister(InfluxCommand command) {
+        Preconditions.checkNotNull(command, "Command must not be null.");
+        return command.unregister(getCommandMap());
+    }
+
+    @Override
+    public boolean unregister(String command) {
+        if (super.unregister(command)) {
+            org.bukkit.command.Command bukkitCommand = getCommandMap().getCommand(command);
+            if (bukkitCommand != null && bukkitCommand instanceof InfluxCommand) {
+                return unregister((InfluxCommand) bukkitCommand);
             }
         }
-    }
-
-    @Override
-    public void register(InfluxCommand command) {
-        if (REGISTERED_COMMANDS.contains(command.getName().toLowerCase().trim())) {
-            // Already registered -> no need to do so again
-            return;
-        }
-
-        if (!getCommandMap().register(getManager().getPlugin().getName(), command)) {
-            // More of a backup for above
-            unregister(command);
-        } else {
-            REGISTERED_COMMANDS.add(command.getName().toLowerCase().trim());
-        }
-    }
-
-    @Override
-    public void unregister(InfluxCommand command) {
-        command.unregister(getCommandMap());
-        REGISTERED_COMMANDS.remove(command.getName().toLowerCase().trim());
-    }
-
-    @Override
-    public void unregister(String command) {
-        org.bukkit.command.Command bukkitCommand = getCommandMap().getCommand(command);
-        if (bukkitCommand != null && bukkitCommand instanceof InfluxCommand) {
-            unregister((InfluxCommand) bukkitCommand);
-        }
+        return false;
     }
 }

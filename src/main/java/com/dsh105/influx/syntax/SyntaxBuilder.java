@@ -17,10 +17,6 @@
 
 package com.dsh105.influx.syntax;
 
-import com.dsh105.influx.syntax.parameter.Parameter;
-import com.dsh105.influx.syntax.parameter.ParameterBinding;
-import com.dsh105.influx.syntax.parameter.Variable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -28,21 +24,71 @@ import java.util.regex.Pattern;
 
 public class SyntaxBuilder {
 
-    private static final Pattern VARIABLE_PATTERN = Pattern.compile("(<|\\[)([^<>\\[\\]]+?)(>|\\])");
+    public static final Pattern VARIABLE_PATTERN = Pattern.compile("(<|\\[)([^<>\\[\\]]+?)(>|\\])");
 
     private CommandBinding commandBinding;
     private String commandSyntax;
     private String[] arguments;
     private List<Parameter> parameters;
 
-    public SyntaxBuilder(String commandSyntax) {
+    public SyntaxBuilder(String commandSyntax) throws IllegalSyntaxException {
         this(commandSyntax, null);
     }
 
-    public SyntaxBuilder(String commandSyntax, CommandBinding commandBinding) {
+    public SyntaxBuilder(String commandSyntax, CommandBinding commandBinding) throws IllegalSyntaxException {
         this.commandBinding = commandBinding;
         this.commandSyntax = commandSyntax;
         this.arguments = this.commandSyntax.split("\\s+");
+        this.parameters = new ArrayList<>();
+
+        List<String> variableNames = new ArrayList<>();
+
+        for (int i = 0; i < arguments.length; i++) {
+            String argument = arguments[i];
+            Parameter parameter;
+
+            Matcher variableMatcher = VARIABLE_PATTERN.matcher(argument);
+            if (variableMatcher.matches()) {
+                try {
+                    parameter = buildVariable(variableMatcher, i);
+                } catch (IllegalVerificationException e) {
+                    throw new IllegalSyntaxException("Invalid variable: " + variableMatcher.group(0));
+                }
+                if (variableNames.contains(parameter.getName())) {
+                    throw new IllegalSyntaxException("Command variables cannot have identical names. \"" + parameter.getName() + "\" found more than once in \"" + getCommandSyntax() + "\".");
+                }
+                variableNames.add(parameter.getName());
+            } else {
+                List<Variable> innerVariables = new ArrayList<>();
+                while (variableMatcher.find()) {
+                    try {
+                        innerVariables.add(buildVariable(variableMatcher, i));
+                    } catch (IllegalVerificationException e) {
+                        throw new IllegalSyntaxException("Invalid variable: " + variableMatcher.group(0));
+                    }
+                }
+                parameter = new Parameter(argument, i, innerVariables);
+            }
+
+            parameters.add(i, parameter);
+        }
+
+        for (int i = 0; i < parameters.size() - 1; i++) {
+            Parameter parameter = parameters.get(i);
+            String reason = null;
+            if (parameter.isContinuous()) {
+                // 'Continuous' variables cannot exist in the middle of the syntax
+                reason = "continuous variables can only exist as the final parameter";
+            }/* else if (variable.isOptional() && variable.getDefaultValue() == null) {
+                    // Optional variables can only exist in the middle if they have a default value
+                    reason = "optional variables can only exist as a middle parameter if a default value is present";
+                }*/
+            // This isn't really something to warn users of - command will only fire if a value is provided
+
+            if (reason != null) {
+                throw new IllegalSyntaxException("Invalid syntax (at pos. " + i + " -> \"" + parameter.getFullName() + "\"): " + reason + ".");
+            }
+        }
     }
 
     public CommandBinding getCommandBinding() {
@@ -58,36 +104,20 @@ public class SyntaxBuilder {
     }
 
     public List<Parameter> getParameters() {
-        return build();
-    }
-
-    public List<Parameter> build() {
-        if (parameters == null) {
-            parameters = new ArrayList<>();
-
-            for (int i = 0; i < arguments.length; i++) {
-                String argument = arguments[i];
-                Parameter parameter;
-                ParameterBinding binding = getCommandBinding() != null ? getCommandBinding().getBinding(i) : null;
-
-                Matcher variableMatcher = VARIABLE_PATTERN.matcher(argument);
-                if (variableMatcher.matches()) {
-                    parameter = buildVariable(variableMatcher, binding, i);
-                } else {
-                    List<Variable> innerVariables = new ArrayList<>();
-                    while (variableMatcher.find()) {
-                        innerVariables.add(buildVariable(variableMatcher, binding, i));
-                    }
-                    parameter = new Parameter(argument, i, innerVariables);
-                }
-
-                parameters.add(i, parameter);
-            }
-        }
         return parameters;
     }
 
-    private Variable buildVariable(Matcher matcher, ParameterBinding binding, int index) {
-        return new Variable(matcher.group(2), index, binding == null ? "" : binding.getRegex(), matcher.group(1).equals("["), index == arguments.length - 1 && matcher.group(2).endsWith("..."));
+    private Variable buildVariable(Matcher matcher, int index) throws IllegalVerificationException {
+        String name = matcher.group(2);
+        ParameterBinding binding = getCommandBinding() == null ? null : getCommandBinding().getBinding(name);
+        String regex = "";
+        String defaultValue = null;
+        int argumentsAccepted = 1;
+        if (binding != null) {
+            regex = binding.getRegex();
+            defaultValue = binding.getDefaultValue();
+            argumentsAccepted = binding.getArgumentsAccepted();
+        }
+        return new Variable(name, index, regex, matcher.group(1).equals("["), name.endsWith("..."), defaultValue, argumentsAccepted);
     }
 }

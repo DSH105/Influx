@@ -17,40 +17,34 @@
 
 package com.dsh105.influx.syntax;
 
-import com.dsh105.influx.annotation.*;
-import com.dsh105.influx.context.CommandEvent;
-import com.dsh105.influx.syntax.parameter.Parameter;
-import com.dsh105.influx.syntax.parameter.ParameterBinding;
+import com.dsh105.influx.IllegalCommandException;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public abstract class CommandBinding {
 
     private Class<?>[] parameters;
-    private Map<Integer, ParameterBinding> bindings = new HashMap<>();
+    private Map<Integer, ParameterBinding> bindings;
     private Method callableMethod;
 
+    protected void prepare() throws IllegalCommandException {
+        this.callableMethod = prepareCallable();
+        this.parameters = callableMethod.getParameterTypes();
+        this.bindings = prepareBindings();
+    }
+
     public Method getCallableMethod() {
-        if (callableMethod == null) {
-            prepare();
-        }
         return callableMethod;
     }
 
     public Class<?>[] getParameters() {
-        if (parameters == null) {
-            getCallableMethod();
-        }
         return parameters;
     }
 
     public Map<Integer, ParameterBinding> getBindings() {
-        if (bindings == null) {
-            getParameters();
-        }
         return Collections.unmodifiableMap(bindings);
     }
 
@@ -59,25 +53,53 @@ public abstract class CommandBinding {
     }
 
     public ParameterBinding getBinding(Parameter parameter) {
+        if (parameter instanceof Variable) {
+            return getBinding(parameter.getName() + (parameter.isContinuous() ? "..." : ""));
+        }
+        return null;
+    }
+
+    public ParameterBinding getBinding(String parameterName) {
         for (ParameterBinding binding : getBindings().values()) {
-            if (binding.getBoundParameter().equals(parameter.getName())) {
+            if (binding.getBoundParameter().equals(parameterName)) {
                 return binding;
             }
         }
         return null;
     }
 
-    public static boolean isValid(Method candidate) {
-        return candidate.isAnnotationPresent(com.dsh105.influx.annotation.Command.class) && candidate.getReturnType().equals(boolean.class) && candidate.getParameterTypes().length >= 1 && CommandEvent.class.isAssignableFrom(candidate.getParameterTypes()[0]);
-    }
-
-    private void prepare() {
-        callableMethod = prepareCallable();
-        parameters = callableMethod.getParameterTypes();
-        bindings = prepareBindings();
-    }
-
-    public abstract Method prepareCallable();
+    public abstract Method prepareCallable() throws IllegalCommandException;
 
     public abstract Map<Integer, ParameterBinding> prepareBindings();
+
+    @Override
+    public String toString() {
+        return "CommandBinding{" +
+                "parameters=" + Arrays.toString(parameters) +
+                ", bindings=" + bindings +
+                ", callableMethod=" + callableMethod +
+                "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CommandBinding)) return false;
+
+        CommandBinding that = (CommandBinding) o;
+
+        if (!bindings.equals(that.bindings)) return false;
+        if (!callableMethod.equals(that.callableMethod)) return false;
+        if (!Arrays.equals(parameters, that.parameters)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(parameters);
+        result = 31 * result + bindings.hashCode();
+        result = 31 * result + callableMethod.hashCode();
+        return result;
+    }
 }

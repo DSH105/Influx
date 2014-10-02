@@ -17,9 +17,7 @@
 
 package com.dsh105.influx.dispatch;
 
-import com.dsh105.influx.InfluxException;
-
-public class CommandInvocationException extends InfluxException {
+public class CommandInvocationException extends Exception {
 
     public CommandInvocationException() {
     }

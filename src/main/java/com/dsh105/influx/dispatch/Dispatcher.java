@@ -19,30 +19,28 @@ package com.dsh105.influx.dispatch;
 
 import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.Controller;
-import com.dsh105.influx.format.FormatSet;
-import com.dsh105.influx.Manager;
-import com.dsh105.influx.format.MessagePurpose;
-import com.dsh105.influx.context.CommandEvent;
-import com.dsh105.influx.syntax.Suggestion;
-import com.dsh105.influx.syntax.SyntaxBuilder;
-import com.dsh105.influx.syntax.parameter.Parameter;
-import com.dsh105.influx.syntax.parameter.Variable;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
+import com.dsh105.influx.InfluxManager;
+import com.dsh105.influx.conversion.ConversionException;
+import com.dsh105.influx.response.MessagePurpose;
+import com.dsh105.influx.response.ResponseLevel;
+import com.dsh105.influx.help.Suggestion;
+import com.dsh105.influx.response.ResponseUnsupportedException;
+import com.dsh105.influx.syntax.*;
 
 import java.util.*;
 
-public class Dispatcher implements CommandExecutor {
+public class Dispatcher<S> {
 
-    private Manager manager;
+    protected Map<String, Map<Controller, ConsumedArgumentSet>> consumedArgumentSets = new HashMap<>();
+    protected Map<String, FuzzyArgumentMatcher> fuzzyMatchers = new HashMap<>();
 
-    public Dispatcher(Manager manager) {
+    private InfluxManager<S> manager;
+
+    public Dispatcher(InfluxManager<S> manager) {
         this.manager = manager;
     }
 
-    public Manager getManager() {
+    public InfluxManager<S> getManager() {
         return manager;
     }
 
@@ -51,88 +49,103 @@ public class Dispatcher implements CommandExecutor {
     }
 
     public Controller match(String input) {
-        for (Controller controller : manager) {
-            if (controller.matches(input)) {
-                return controller;
+        Map<Controller, ConsumedArgumentSet> existing = consumedArgumentSets.get(input);
+        if (existing != null) {
+            for (Controller key : existing.keySet()) {
+                if (existing.get(key).matches()) {
+                    return key;
+                }
+            }
+        } else {
+            existing = new HashMap<>();
+        }
+
+        for (Controller candidate : manager) {
+            ConsumedArgumentSet argumentSet = new ConsumedArgumentSet(candidate.getCommand(), input);
+
+            existing.put(candidate, argumentSet);
+            consumedArgumentSets.put(input, existing);
+
+            if (argumentSet.matches()) {
+                return candidate;
             }
         }
         return null;
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        List<String> arguments = new ArrayList<>();
-        Collections.addAll(arguments, args);
-        arguments.add(0, command.getLabel());
-        return dispatch(sender, arguments.toArray(new String[0]));
+    public SortedSet<Controller> findFuzzyMatches(String input) {
+        FuzzyArgumentMatcher fuzzyArgumentMatcher = fuzzyMatchers.get(input);
+        if (fuzzyArgumentMatcher == null) {
+            fuzzyArgumentMatcher = new FuzzyArgumentMatcher(getManager(), input);
+            fuzzyMatchers.put(input, fuzzyArgumentMatcher);
+        }
+        return Collections.unmodifiableSortedSet(fuzzyArgumentMatcher.getHighestPossibleMatches());
     }
 
-    public <T extends CommandSender> boolean dispatch(T sender, String... arguments) {
+    public <T extends S> boolean dispatch(T sender, String... arguments) {
         String input = StringUtil.combineArray(" ", arguments).trim();
+
         Controller controller = match(input);
+
         if (controller != null) {
-            return dispatch(new CommandEvent<>(getManager(), controller, input, sender));
+            return preDispatch(sender, controller, input);
         }
 
         // command not found - do something else with it
-        getManager().getFormatSet().send(sender, getManager().getMessage(MessagePurpose.COMMAND_NOT_FOUND), FormatSet.SEVERE);
+        getManager().respond(sender, getManager().getMessage(MessagePurpose.COMMAND_NOT_FOUND, "<command>", getManager().getCommandPrefix() + input), ResponseLevel.SEVERE);
 
         Suggestion suggestion = new Suggestion(getManager(), input);
         if (!suggestion.getSuggestions().isEmpty()) {
-            String suggestions = StringUtil.combine(ChatColor.RESET + "{c1}, " + ChatColor.ITALIC, suggestion.getSuggestions());
-            getManager().getFormatSet().send(sender, "Did you mean: " + suggestions);
+            String suggestions = StringUtil.combine("{c1}, ", suggestion.getSuggestions());
+            getManager().respond(sender, "Did you mean: " + suggestions, ResponseLevel.SEVERE);
         }
         return true;
     }
 
-    public <T extends CommandSender> boolean dispatch(CommandEvent<T> event) {
-        try {
+    public <T extends S> boolean preDispatch(T sender, Controller controller, String input) {
+        return dispatch(new CommandContext<>(getManager(), controller, sender, consumedArgumentSets.get(input).get(controller)));
+    }
 
-            if (event.getCommand().acceptsSender(event.sender())) {
-                event.respond(getManager().getMessage(MessagePurpose.NO_ACCESS), FormatSet.SEVERE);
+    public boolean dispatch(CommandContext<S> context) {
+        try {
+            if (!context.getCommand().acceptsSender(context.sender().getClass())) {
+                context.respond(getManager().getMessage(MessagePurpose.RESTRICTED_SENDER), ResponseLevel.SEVERE);
                 return true;
             }
 
-            List<String> permissions = preparePermissions(event);
-            if (permissions.size() > 0 && !testPermissions(event.sender(), permissions)) {
-                String response = getManager().getMessage(event.getCommand().getVariables().size() > 0 ? MessagePurpose.NO_PERMISSION_WITH_VAR_RECOMMENDATION : MessagePurpose.NO_PERMISSION);
-                event.respond(response, FormatSet.SEVERE);
+            List<String> permissions = preparePermissions(context);
+            if (permissions.size() > 0 && !getManager().authorize(context.sender(), context.getController(), permissions)) {
+                String response = getManager().getMessage(context.getCommand().getVariables().size() > 0 ? MessagePurpose.RESTRICTED_PERMISSION_WITH_VAR_RECOMMENDATION : MessagePurpose.RESTRICTED_PERMISSION);
+                context.respond(response, ResponseLevel.SEVERE);
                 return true;
             }
 
             // Begin actually executing/invoking the command
-            boolean result = event.getController().getCallable().call(event);
+            boolean result = context.getController().getCommandInvoker().invoke(context);
 
             if (!result) {
-                for (String part : event.getController().getDescription().getUsage()) {
-                    event.respond(part.replace("<command>", event.getCommand().getStringSyntax()));
+                for (String part : context.getController().getDescription().getUsage()) {
+                    context.respond(part.replace("<command>", getManager().getCommandPrefix() + context.getCommand().getReadableSyntax()));
                 }
             }
+        } catch (ConversionException | ResponseUnsupportedException e) {
+            context.respond(e.getMessage(), ResponseLevel.SEVERE);
         } catch (Exception e) {
-            event.respond(getManager().getMessage(MessagePurpose.UNEXPECTED_ERROR), FormatSet.SEVERE);
-            new CommandInvocationException("Unhandled exception executing \""  + event.getCommand().getStringSyntax() + "\" (from \"" + event.getInput() + "\") for " + getManager().getPlugin().getName(), e).printStackTrace();
+            context.respond(getManager().getMessage(MessagePurpose.UNEXPECTED_ERROR), ResponseLevel.SEVERE);
+            throw new CommandDispatchException("Unhandled exception executing \""  + context.getCommand().getReadableSyntax() + "\" (from \"" + context.getInput() + "\")", e);
         }
         return true;
     }
 
-    private boolean testPermissions(CommandSender sender, String... permissions) {
-        return testPermissions(sender, Arrays.asList(permissions));
-    }
-
-    private boolean testPermissions(CommandSender sender, Collection<String> permissions) {
-        for (String permission : permissions) {
-            if (!permission.isEmpty() && sender.hasPermission(permission)) {
+    protected List<String> preparePermissions(CommandContext context) {
+        List<String> permissions = new ArrayList<>();
+        for (String permission : context.getCommand().getPermissions()) {
+            SyntaxBuilder syntaxBuilder;
+            try {
+                syntaxBuilder = new SyntaxBuilder(permission);
+            } catch (IllegalSyntaxException e) {
                 continue;
             }
-            return false;
-        }
-        return true;
-    }
-
-    private List<String> preparePermissions(CommandEvent event) {
-        List<String> permissions = new ArrayList<>();
-        for (String permission : event.getCommand().getPermissions()) {
-            SyntaxBuilder syntaxBuilder = new SyntaxBuilder(permission);
 
             // Permissions *should* be without spaces
             // Accounted for anyway, just in case
@@ -140,15 +153,21 @@ public class Dispatcher implements CommandExecutor {
             for (Parameter parameter : syntaxBuilder.getParameters()) {
                 if (parameter instanceof Variable) {
                     Variable variable = (Variable) parameter;
-                    modifiedPermission = modifiedPermission.replace(variable.getFullName(), event.var(variable.getName()));
+                    modifiedPermission = modifiedPermission.replace(variable.getFullName(), context.var(variable.getName()));
                     continue;
                 }
 
                 if (parameter.containsInnerVariables()) {
                     for (Variable variable : parameter.getInnerVariables()) {
-                        modifiedPermission = modifiedPermission.replace(variable.getFullName(), event.var(variable.getName()));
+                        modifiedPermission = modifiedPermission.replace(variable.getFullName(), context.var(variable.getName()));
                     }
                 }
+            }
+
+            // Ensure no variables are still defined in the permission
+            // Most likely optional parameters that haven't been defined
+            if (SyntaxBuilder.VARIABLE_PATTERN.matcher(modifiedPermission).find()) {
+                continue;
             }
 
             permissions.add(permission);
