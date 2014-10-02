@@ -50,13 +50,7 @@ public class BukkitHelpProvider<S extends CommandSender> extends HelpProvider<Bu
                 .append("Help: ")
                 .append(getManager().getHelpTitle())
                 .append(" ")
-                .append("Page ")
-                .append(ChatColor.RED)
-                .append("{pages} ")
-                .append(ChatColor.GOLD)
-                .append("/ ")
-                .append(ChatColor.RED)
-                .append("{total} ")
+                .append("{topic}")
                 .append(ChatColor.YELLOW);
         for (int i = header.length(); i < ChatPaginator.AVERAGE_CHAT_PAGE_WIDTH; i++) {
             header.append("-");
@@ -85,7 +79,7 @@ public class BukkitHelpProvider<S extends CommandSender> extends HelpProvider<Bu
             getManager().respond(sender, getManager().getMessage(MessagePurpose.PAGE_NOT_FOUND, "<page>", page));
             return;
         }
-        String header = getHeader().replace("{pages}", "" + page).replace("{total}", "" + getPaginator().getPages());
+        String header = getHeader().replace("{topic}", "Page " + ChatColor.RED + page + ChatColor.GOLD + "/" + ChatColor.RED + getPaginator().getPages());
         getManager().respondAnonymously(sender, header);
         for (String part : getPaginator().getPage(page)) {
             getManager().respondAnonymously(sender, part);
@@ -94,6 +88,8 @@ public class BukkitHelpProvider<S extends CommandSender> extends HelpProvider<Bu
 
     @Override
     public <T extends S> void sendHelpFor(T sender, Controller controller) {
+        String header = getHeader().replace("{topic}", getManager().getCommandPrefix() + controller.getCommand().getReadableSyntax());
+        getManager().respondAnonymously(sender, header);
         for (String part : getHelpFor(controller)) {
             try {
                 PowerMessage message = PowerMessage.fromJson(part);
