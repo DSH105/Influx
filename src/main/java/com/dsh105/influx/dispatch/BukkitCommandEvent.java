@@ -24,10 +24,15 @@ import com.dsh105.influx.syntax.ConsumedArgumentSet;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
-public class CommandEvent<S extends CommandSender> extends CommandContext<S> {
+public class BukkitCommandEvent<S extends CommandSender> extends CommandContext<S> {
 
-    public CommandEvent(InfluxManager<S> manager, Controller controller, S sender, ConsumedArgumentSet consumedArgumentSet) {
+    public BukkitCommandEvent(InfluxManager<S> manager, Controller controller, S sender, ConsumedArgumentSet consumedArgumentSet) {
         super(manager, controller, sender, consumedArgumentSet);
+    }
+
+    @Override
+    public S sender() {
+        return super.sender();
     }
 
     public Plugin getPlugin() {

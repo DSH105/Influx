@@ -23,7 +23,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,6 +42,6 @@ public class BukkitDispatcher extends Dispatcher<CommandSender> implements Comma
 
     @Override
     public <T extends CommandSender> boolean preDispatch(T sender, Controller controller, String input) {
-        return dispatch(new CommandEvent<>(getManager(), controller, sender, consumedArgumentSets.get(input).get(controller)));
+        return dispatch(new BukkitCommandEvent<>(getManager(), controller, sender, consumedArgumentSets.get(input).get(controller)));
     }
 }

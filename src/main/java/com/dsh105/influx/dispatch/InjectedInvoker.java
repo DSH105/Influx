@@ -20,6 +20,7 @@ package com.dsh105.influx.dispatch;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.conversion.ConversionException;
 import com.dsh105.influx.conversion.Converter;
+import com.dsh105.influx.conversion.UnboundConverter;
 import com.dsh105.influx.syntax.ContextualVariable;
 import com.dsh105.influx.syntax.ParameterBinding;
 import com.google.common.primitives.Primitives;
@@ -45,7 +46,7 @@ public class InjectedInvoker extends CommandInvoker {
         Arrays.fill(parameters, null);
 
         if (!methodParameters[0].isAssignableFrom(context.getClass())) {
-            // e.g. someMethod(CommandEvent) -> where `context` is not an instance of CommandEvent
+            // e.g. someMethod(BukkitCommandEvent) -> where `context` is not an instance of BukkitCommandEvent
             throw new CommandInvocationException("Method does not accept provided context (accepts " + methodParameters[0].getClass().getCanonicalName() + ", but provided " + context.getClass().getSimpleName() + ")");
         }
 
