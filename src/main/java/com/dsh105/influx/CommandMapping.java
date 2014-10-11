@@ -55,7 +55,7 @@ public abstract class CommandMapping implements InfluxMapping {
 
     @Override
     public List<Controller> register(CommandListener listener, String... parentNests) {
-        return nestCommandsIn(listener, listener, false, parentNests);
+        return nestCommandsIn(listener, listener, true, parentNests);
     }
 
     @Override
@@ -69,7 +69,7 @@ public abstract class CommandMapping implements InfluxMapping {
     }
 
     @Override
-    public List<Controller> nestCommandsIn(CommandListener destination, CommandListener origin, boolean onlyAnnotatedNests, String... parentNests) {
+    public List<Controller> nestCommandsIn(CommandListener destination, CommandListener origin, boolean nestAll, String... parentNests) {
         List<Controller> registered = new ArrayList<>();
         for (Method method : origin.getClass().getDeclaredMethods()) {
             CommandBuilder builder;
@@ -80,11 +80,7 @@ public abstract class CommandMapping implements InfluxMapping {
                 continue;
             }
 
-            if (onlyAnnotatedNests && !builder.nested) {
-                continue;
-            }
-
-            CommandNest nest = new CommandNest(destination, builder, parentNests);
+            CommandNest nest = new CommandNest(nestAll, destination, builder, parentNests);
             builder.restrict(nest.getPermissions().toArray(new String[0]));
             Controller controller = register(builder, nest.getParents().toArray(new String[0]));
             if (controller != null) {
@@ -148,6 +144,17 @@ public abstract class CommandMapping implements InfluxMapping {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void updateCommandNesting(Controller controller, String... parents) {
+        if (!exists(controller)) {
+            return;
+        }
+
+        getRegistry().unregister(controller);
+        controller.getCommand().nestUnder(parents);
+        getRegistry().register(controller);
     }
 
     @Override

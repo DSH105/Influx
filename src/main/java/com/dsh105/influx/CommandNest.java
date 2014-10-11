@@ -30,16 +30,18 @@ public class CommandNest {
     private List<String> parents = new ArrayList<>();
     private List<String> permissions = new ArrayList<>();
 
-    public CommandNest(CommandListener destination, CommandBuilder builder, String... parents) {
+    public CommandNest(boolean nestAll, CommandListener destination, CommandBuilder builder, String... parents) {
         Nested nesting = builder.getCommandBinding().getCallableMethod().getAnnotation(Nested.class);
         if (nesting != null) {
             Collections.addAll(this.parents, nesting.value());
         }
 
-        try {
-            prepare(destination);
-        } catch (IllegalCommandException ignored) {
-            // Not a problem, nests can be provided in more than one way!
+        if (nestAll) {
+            try {
+                prepare(destination);
+            } catch (IllegalCommandException ignored) {
+                // Not a problem, nests can be provided in more than one way!
+            }
         }
 
         Collections.addAll(this.parents, parents);
