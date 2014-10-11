@@ -72,33 +72,38 @@ public class FuzzyArgumentMatcher {
         // Only compares parameters, not variables
 
         controllerIter: for (Controller controller : candidates.keySet()) {
-            for (Syntax syntax : candidates.get(controller)) {
-                int syntaxLength = syntax.getSyntax().size();
-                for (int i = 0; i < syntaxLength; i++) {
-                    Parameter parameter = syntax.getParameter(i, false);
-                    if (parameter == null) {
-                        continue controllerIter;
-                    }
-
-                    if (parameter instanceof Variable) {
-                        // Syntax requires more
-                        possibleMatch(i, controller);
-                        continue controllerIter;
-                    }
-
-                    try {
-                        String arg = arguments[i];
-                        if (i == arguments.length - 1) {
-                            if (arg.toLowerCase().startsWith(parameter.getName().toLowerCase())) {
-                                possibleMatch(i, controller);
-                            }
-                        } else if (parameter.verify(arg)) {
-                            possibleMatch(i, controller);
+            SortedSet<Syntax> syntaxSet = candidates.get(controller);
+            if (syntaxSet != null && !syntaxSet.isEmpty()) {
+                syntaxIter: for (Syntax syntax : candidates.get(controller)) {
+                    int syntaxLength = syntax.getSyntax().size();
+                    for (int i = 0; i < syntaxLength; i++) {
+                        Parameter parameter = syntax.getParameter(i, false);
+                        if (parameter == null) {
+                            continue syntaxIter;
                         }
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        possibleMatch(i, controller);
-                    }
 
+                        if (parameter instanceof Variable) {
+                            // Syntax requires more
+                            possibleMatch(i, controller);
+                            continue controllerIter;
+                        }
+
+                        try {
+                            String arg = arguments[i];
+                            if (i == arguments.length - 1) {
+                                if (arg.toLowerCase().startsWith(parameter.getName().toLowerCase())) {
+                                    possibleMatch(i, controller);
+                                    continue controllerIter;
+                                }
+                            } else if (parameter.verify(arg)) {
+                                possibleMatch(i, controller);
+                                continue controllerIter;
+                            }
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            possibleMatch(i, controller);
+                            continue controllerIter;
+                        }
+                    }
                 }
             }
         }
