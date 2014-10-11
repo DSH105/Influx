@@ -20,9 +20,11 @@ package com.dsh105.influx;
 import com.dsh105.influx.dispatch.Authorization;
 import com.dsh105.influx.dispatch.BukkitDispatcher;
 import com.dsh105.influx.dispatch.Dispatcher;
+import com.dsh105.influx.help.BukkitHelpProvider;
 import com.dsh105.influx.help.HelpProvision;
 import com.dsh105.influx.registration.RegistrationStrategy;
 import com.dsh105.influx.response.BukkitResponder;
+import com.dsh105.influx.response.MessagePurpose;
 import com.dsh105.influx.response.Responder;
 import com.dsh105.influx.response.ResponseLevel;
 import org.bukkit.command.CommandSender;
@@ -39,15 +41,25 @@ public class BukkitCommandManager extends CommandManager<CommandSender> implemen
     public BukkitCommandManager(RegistrationStrategy registrationStrategy, Plugin plugin) {
         super(registrationStrategy, "/");
         this.plugin = plugin;
+        this.dispatcher = new BukkitDispatcher(this);
+        this.setHelpTitle(plugin.getName());
         this.setResponseHandler(new BukkitResponder(""));
         this.setHelpProvision(HelpProvision.BUKKIT);
-        this.setHelpTitle(plugin.getName());
         this.setAuthorization(new Authorization<CommandSender>() {
             @Override
             public boolean authorize(CommandSender sender, Controller toExecute, String permission) {
                 return sender.hasPermission(permission);
             }
         });
+        this.setMessage(MessagePurpose.RESTRICTED_SENDER, "Please log in to perform that command.");
+    }
+
+    @Override
+    public void setHelpTitle(String helpTitle) {
+        super.setHelpTitle(helpTitle);
+        if (this.getHelp() instanceof BukkitHelpProvider) {
+            ((BukkitHelpProvider) getHelp()).buildHeader();
+        }
     }
 
     @Override
