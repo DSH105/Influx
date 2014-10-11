@@ -94,10 +94,10 @@ public class Dispatcher<S> {
         // command not found - do something else with it
         getManager().respond(sender, getManager().getMessage(MessagePurpose.COMMAND_NOT_FOUND, "<command>", getManager().getCommandPrefix() + input), ResponseLevel.SEVERE);
 
-        Suggestion suggestion = new Suggestion(getManager(), input);
+        Suggestion suggestion = new Suggestion(getManager(), input, 3);
         if (!suggestion.getSuggestions().isEmpty()) {
-            String suggestions = StringUtil.combine("{c1}, ", suggestion.getSuggestions());
-            getManager().respond(sender, "Did you mean: " + suggestions, ResponseLevel.SEVERE);
+            String suggestions = StringUtil.combine("{c1}, {c2}", suggestion.getSuggestions());
+            getManager().respond(sender, getManager().getMessage(MessagePurpose.SUGGESTIONS, "<suggestions>", suggestions), ResponseLevel.SEVERE);
         }
         return true;
     }

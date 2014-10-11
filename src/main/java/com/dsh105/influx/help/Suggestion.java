@@ -32,12 +32,16 @@ public class Suggestion {
     private String input;
     private ArrayList<String> suggestions;
 
-    public Suggestion(InfluxManager<?> manager, String input) {
+    public Suggestion(InfluxManager<?> manager, String input, int maximumAllowed) {
         this.manager = manager;
         this.input = input;
         this.suggestions = new ArrayList<>();
 
         for (Controller controller : getManager().getMappedCommands()) {
+            if (this.suggestions.size() > maximumAllowed) {
+                break;
+            }
+
             if (!this.suggestions.contains(controller.getCommand().getReadableSyntax())) {
                 Command command = controller.getCommand();
                 String[] parts = command.getStringSyntax().split("\\s+");
