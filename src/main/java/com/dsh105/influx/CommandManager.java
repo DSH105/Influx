@@ -27,6 +27,7 @@ import com.dsh105.influx.registration.Registry;
 import com.dsh105.influx.response.DefaultResponder;
 import com.dsh105.influx.response.Responder;
 import com.dsh105.influx.response.ResponseLevel;
+import com.dsh105.influx.util.Replacer;
 import com.google.common.base.Preconditions;
 import org.bukkit.material.Sandstone;
 
@@ -40,7 +41,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
     private String helpTitle;
     private String commandPrefix;
 
-    private Dispatcher<S> dispatcher;
+    protected Dispatcher<S> dispatcher;
     private Registry registry;
     private HelpProvider<?, S> help;
     private Responder<S> responder;
@@ -158,14 +159,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
         if (!messages.containsKey(purpose)) {
             messages.put(purpose, purpose.getDefaultValue());
         }
-        String message = messages.get(purpose);
-        for (int i = 0; i < pairedReplacements.length; i += 2) {
-            if ((i + 1) >= pairedReplacements.length) {
-                break;
-            }
-            message = message.replace(pairedReplacements[i].toString(), pairedReplacements[i + 1].toString());
-        }
-        return message;
+        return Replacer.makeReplacements(messages.get(purpose), pairedReplacements);
     }
 
     @Override
@@ -175,6 +169,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     @Override
     public void setHelpTitle(String helpTitle) {
+        Preconditions.checkNotNull(helpTitle, "Help title must not be null.");
         this.helpTitle = helpTitle;
     }
 

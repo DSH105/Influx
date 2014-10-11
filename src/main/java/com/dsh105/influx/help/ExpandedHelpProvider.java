@@ -38,18 +38,36 @@ public class ExpandedHelpProvider<S> extends HelpProvider<ExpandedHelpEntry, S> 
     }
 
     @Override
-    protected void add(String group, ExpandedHelpEntry entry) {
-        super.add(group, entry);
-        paginator.add(entry);
+    protected boolean add(ExpandedHelpEntry entry) {
+        if (super.add(entry)) {
+            paginator.add(entry);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean remove(String group, ExpandedHelpEntry entry) {
+        if (super.remove(group, entry)) {
+            paginator.remove(entry);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public <T extends S> void sendPage(T sender, int page) {
-        if (!getPaginator().exists(page)) {
+        ObjectPaginator<ExpandedHelpEntry> paginator = new ObjectPaginator<>(getPaginator().getPerPage());
+        for (ExpandedHelpEntry entry : getPaginator().getRaw()) {
+            if (getManager().authorize(sender, entry.getController(), entry.getPermissions())) {
+                paginator.add(entry);
+            }
+        }
+        if (!paginator.exists(page)) {
             getManager().respond(sender, getManager().getMessage(MessagePurpose.PAGE_NOT_FOUND, "<page>", page));
             return;
         }
-        for (String entry : getPaginator().getPage(page)) {
+        for (String entry : paginator.getPage(page)) {
             getManager().respondAnonymously(sender, entry);
         }
     }

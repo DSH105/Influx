@@ -43,8 +43,16 @@ public abstract class Responder<S> {
         return format(message, ResponseLevel.DEFAULT);
     }
 
+    public String format(String message, boolean includeFirstColour) {
+        return format(message, ResponseLevel.DEFAULT, includeFirstColour);
+    }
+
     public String format(String message, ResponseLevel level) {
-        message = "{c1}" + message;
+        return format(message, level, true);
+    }
+
+    public String format(String message, ResponseLevel level, boolean includeFirstColour) {
+        message = (includeFirstColour ? "{c1}" : "") + message;
         Matcher matcher = Pattern.compile("\\{c([0-9]+)\\}").matcher(message);
         while (matcher.find()) {
             message = message.replace(matcher.group(0), getFormat(Integer.parseInt(matcher.group(1)), level));
@@ -61,7 +69,7 @@ public abstract class Responder<S> {
     public <T extends S> void respond(T sender, String message, ResponseLevel level) {
         String response = message;
         if (!getResponsePrefix().isEmpty()) {
-            response = getResponsePrefix() + " " + message;
+            response = getResponsePrefix() + " " + format(message);
         }
         respondAnonymously(sender, response, level);
     }

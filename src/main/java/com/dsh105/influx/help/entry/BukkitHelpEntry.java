@@ -20,7 +20,9 @@ package com.dsh105.influx.help.entry;
 import com.dsh105.commodus.paginator.Pageable;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.Description;
+import com.dsh105.influx.help.BukkitHelpProvider;
 import com.dsh105.influx.help.HelpProvider;
+import com.dsh105.influx.response.MessagePurpose;
 import com.dsh105.powermessage.core.PowerMessage;
 import org.bukkit.command.CommandSender;
 
@@ -29,26 +31,25 @@ import java.util.Set;
 
 public class BukkitHelpEntry extends HelpEntry implements Pageable {
 
-    private PowerMessage message;
+    protected PowerMessage message;
 
     public BukkitHelpEntry(HelpProvider helpProvider, Controller controller) {
         super(helpProvider, controller);
+        reformat();
     }
 
     @Override
     public void reformat() {
         super.reformat();
-        message = new PowerMessage();
-        message.then(getHelpProvider().getManager().getCommandPrefix() + getCommandSyntax())
-                .tooltip(format("{c2}Click to auto-complete"))
-                .suggest(getCommandSyntax());
+        message = BukkitHelpProvider.prepare(getHelpProvider().getManager(), this, getTemplate(), -1);
     }
 
     public PowerMessage getMessage() {
-        if (message == null) {
-            reformat();
-        }
         return message;
+    }
+
+    protected String getTemplate() {
+        return getHelpProvider().getManager().getMessage(MessagePurpose.BUKKIT_SHORT_HELP_ENTRY);
     }
 
     @Override

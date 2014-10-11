@@ -25,6 +25,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Note: this class has a natural ordering that is inconsistent with equals.
+ */
 public class HelpEntry implements Comparable<HelpEntry> {
 
     private Controller controller;

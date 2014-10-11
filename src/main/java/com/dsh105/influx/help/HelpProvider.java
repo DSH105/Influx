@@ -22,6 +22,7 @@ import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.help.entry.HelpEntry;
 import com.dsh105.powermessage.core.PowerMessage;
+import com.google.common.base.Preconditions;
 
 import java.util.*;
 
@@ -33,7 +34,7 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
     private HelpProvision provision;
     private String header;
 
-    private HashMap<String, List<H>> groupToEntriesMap = new HashMap<>();
+    private HashMap<String, SortedSet<H>> groupToEntriesMap = new HashMap<>();
     private String defaultEntryListing;
 
     private boolean restrictByPermission = false;
@@ -71,67 +72,63 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
         this.restrictByPermission = restrictByPermission;
     }
 
-    public List<H> getEntries(String group) {
-        List<H> entries = groupToEntriesMap.get(group);
+    public SortedSet<H> getEntries(String group) {
+        SortedSet<H> entries = groupToEntriesMap.get(group);
         if (entries == null) {
-            entries = new ArrayList<>();
+            entries = new TreeSet<>();
         }
-        return Collections.unmodifiableList(entries);
+        return Collections.unmodifiableSortedSet(entries);
     }
 
-    public List<H> getEntries() {
-        List<H> entries = new ArrayList<>();
-        for (List<H> group : groupToEntriesMap.values()) {
+    public SortedSet<H> getEntries() {
+        SortedSet<H> entries = new TreeSet<>();
+        for (SortedSet<H> group : groupToEntriesMap.values()) {
             entries.addAll(group);
         }
-        return Collections.unmodifiableList(entries);
+        return Collections.unmodifiableSortedSet(entries);
     }
 
     public abstract H buildHelpEntry(Controller controller);
 
-    public void add(Controller controller) {
-        this.add(DEFAULT, controller);
+    public boolean add(Controller controller) {
+        return this.add(buildHelpEntry(controller));
     }
 
-    public void add(String group, Controller controller) {
-        if (!manager.exists(controller)) {
-            throw new IllegalArgumentException("Command must be mapped in the InfluxManager before it can be added to a HelpProvider.");
+    protected boolean add(H entry) {
+        Preconditions.checkNotNull(entry, "Help entry must not be null.");
+
+        String group = entry.getController().getDescription().getHelpGroup();
+        SortedSet<H> groupEntries = groupToEntriesMap.get(group);
+        if (groupEntries == null) {
+            groupEntries = new TreeSet<>();
         }
-        add(group, buildHelpEntry(controller));
-
-    }
-
-    protected void add(String group, H entry) {
-        if (entry != null) {
-            List<H> groupEntries = groupToEntriesMap.get(group);
-            if (groupEntries == null) {
-                groupEntries = new ArrayList<>();
-            }
-            groupEntries.add(entry);
+        if (groupEntries.add(entry)) {
             groupToEntriesMap.put(group, groupEntries);
             if (group.equals(DEFAULT)) {
                 this.defaultEntryListing = null;
             }
+            return true;
         }
+        return false;
     }
 
-    public void remove(Controller controller) {
-        mapIter: {
-            for (Map.Entry<String, List<H>> entry : groupToEntriesMap.entrySet()) {
-                Iterator<H> iterator = entry.getValue().iterator();
-                while (iterator.hasNext()) {
-                    H helpEntry = iterator.next();
-                    if (helpEntry.getController().equals(controller)) {
-                        iterator.remove();
-                        break mapIter;
-                    }
+    public boolean remove(Controller controller) {
+        for (Map.Entry<String, SortedSet<H>> entry : groupToEntriesMap.entrySet()) {
+            for (H helpEntry : entry.getValue()) {
+                if (helpEntry.getController().equals(controller)) {
+                    return remove(entry.getKey(), helpEntry);
                 }
             }
         }
+        return false;
+    }
+
+    protected boolean remove(String group, H entry) {
+        return groupToEntriesMap.get(group).remove(entry);
     }
 
     public H getHelpEntry(Controller controller) {
-        for (Map.Entry<String, List<H>> entry : groupToEntriesMap.entrySet()) {
+        for (Map.Entry<String, SortedSet<H>> entry : groupToEntriesMap.entrySet()) {
             for (H helpEntry : entry.getValue()) {
                 if (helpEntry.getController().equals(controller)) {
                     return helpEntry;

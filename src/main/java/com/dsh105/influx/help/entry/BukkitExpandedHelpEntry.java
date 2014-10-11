@@ -20,7 +20,9 @@ package com.dsh105.influx.help.entry;
 import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.Description;
+import com.dsh105.influx.help.BukkitHelpProvider;
 import com.dsh105.influx.help.HelpProvider;
+import com.dsh105.influx.response.MessagePurpose;
 
 import java.util.List;
 import java.util.Set;
@@ -34,14 +36,13 @@ public class BukkitExpandedHelpEntry extends BukkitHelpEntry {
     @Override
     public void reformat() {
         super.reformat();
-        if (!getShortDescription().isEmpty()) {
-            getMessage()
-                    .then("(hover to see " + getController().getCommand().getAliases().size() + " aliases):")
-                    .tooltip(StringUtil.combine("{c1}, {c2}", getController().getCommand().getReadableStringAliases()))
-                    .then(" - ")
-                    .then(format("{c1}" + getShortDescription()))
-                    .tooltip(getShortDescription(), "\n\n")
-                    .tooltip(getLongDescription());
+        if (getLongDescription().length != 0) {
+                getMessage().tooltip(getLongDescription());
         }
+    }
+
+    @Override
+    protected String getTemplate() {
+        return getHelpProvider().getManager().getMessage(MessagePurpose.BUKKIT_HELP_ENTRY);
     }
 }
