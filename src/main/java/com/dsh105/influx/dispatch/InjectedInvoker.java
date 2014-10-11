@@ -54,56 +54,51 @@ public class InjectedInvoker extends CommandInvoker {
 
         if (methodParameters.length != 0) {
 
-            parameterIteration: {
-                for (int i = 1; i < methodParameters.length; i++) {
-                    Class<?> methodParameter = methodParameters[i];
+            parameterIteration:
+            for (int i = 1; i < methodParameters.length; i++) {
+                Class<?> methodParameter = methodParameters[i];
 
-                    ParameterBinding parameterBinding = controller.getCommandBinding().getBinding(i);
-                    ContextualVariable variable = context.getVariable(parameterBinding.getBoundParameter());
-                    if (variable == null) {
-                        if (!UnboundConverter.class.isAssignableFrom(parameterBinding.getBindingType())) {
-                            throw new CommandInvocationException("Parameter binding requested an invalid variable: " + parameterBinding.getBoundParameter());
-                        }
-                        try {
-                            parameters[i] = ((UnboundConverter) parameterBinding.getConverter().newInstance()).convert(context);
-                        } catch (InstantiationException | IllegalAccessException e) {
-                            throw new CommandInvocationException("Failed to instantiate unbound converter (" + parameterBinding.getBindingType().getCanonicalName() + "): default constructor not available");
-                        }
+                ParameterBinding parameterBinding = controller.getCommandBinding().getBinding(i);
+                ContextualVariable variable = context.getVariable(parameterBinding.getBoundParameter());
+                if (variable == null) {
+                    if (!UnboundConverter.class.isAssignableFrom(parameterBinding.getBindingType())) {
+                        throw new CommandInvocationException("Parameter binding requested an invalid variable: " + parameterBinding.getBoundParameter());
                     }
-
-                    if (methodParameter.isAssignableFrom(variable.getConsumedValue().getClass())) {
-                        parameters[i] = variable.getConsumedValue();
-                        break;
+                    try {
+                        parameters[i] = ((UnboundConverter) parameterBinding.getConverter().newInstance()).convert(context);
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new CommandInvocationException("Failed to instantiate unbound converter (" + parameterBinding.getBindingType().getCanonicalName() + "): default constructor not available");
                     }
-
-                    for (Converter<?> converter : PRIMITIVE_CONVERTERS) {
-                        if (converter.getParameterType().isAssignableFrom(Primitives.wrap(methodParameter))) {
-                            try {
-                                parameters[i] = converter.safelyConvert(variable);
-                                break parameterIteration;
-                            } catch (ConversionException ignored) {
-                                // Failed to convert
-                            }
-                        }
-                    }
-
-                    Converter converter = null;
-                    if (parameterBinding.getConverter() != null) {
-                        try {
-                            converter = parameterBinding.getConverter().newInstance();
-                        } catch (InstantiationException | IllegalAccessException e) {
-                            for (Class<?> converterType : getConverters().keySet()) {
-                                if (converterType.isAssignableFrom(parameterBinding.getBindingType())) {
-                                    converter = getConverters().get(converterType);
-                                }
-                            }
-                        }
-                    }
-                    if (converter == null && methodParameter.isPrimitive()) {
-                        throw new CommandInvocationException("Failed to convert variable (\"" + variable.getName() + "\", consumed \"" + variable.getConsumedValue() + "\") for primitive method parameter type: " + methodParameter);
-                    }
-                    parameters[i] = converter == null ? null : converter.safelyConvert(variable);
                 }
+
+                if (methodParameter.isAssignableFrom(variable.getConsumedValue().getClass())) {
+                    parameters[i] = variable.getConsumedValue();
+                    break;
+                }
+
+                for (Converter<?> converter : PRIMITIVE_CONVERTERS) {
+                    if (converter.getParameterType().isAssignableFrom(Primitives.wrap(methodParameter))) {
+                        parameters[i] = converter.safelyConvert(variable);
+                        continue parameterIteration;
+                    }
+                }
+
+                Converter converter = null;
+                if (parameterBinding.getConverter() != null) {
+                    try {
+                        converter = parameterBinding.getConverter().newInstance();
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        for (Class<?> converterType : getConverters().keySet()) {
+                            if (converterType.isAssignableFrom(parameterBinding.getBindingType())) {
+                                converter = getConverters().get(converterType);
+                            }
+                        }
+                    }
+                }
+                if (converter == null && methodParameter.isPrimitive()) {
+                    throw new CommandInvocationException("Failed to convert variable (\"" + variable.getName() + "\", consumed \"" + variable.getConsumedValue() + "\") for primitive method parameter type: " + methodParameter);
+                }
+                parameters[i] = converter == null ? null : converter.safelyConvert(variable);
             }
 
         }
