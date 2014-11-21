@@ -140,8 +140,9 @@ public class BukkitHelpProvider<S extends CommandSender> extends HelpProvider<Bu
         int index = 0;
         Matcher matcher = Pattern.compile("<(.+?)>").matcher(message);
         while (matcher.find()) {
-            if (matcher.start() != 0) {
-                powerMessage.then(manager.getResponder().format(message.substring(index, matcher.start())));
+            if (matcher.start() != index) {
+                // Any characters before the first match
+                powerMessage.then(manager.getResponder().format(message.substring(index, matcher.start()), false));
             }
 
             switch (matcher.group(1)) {
