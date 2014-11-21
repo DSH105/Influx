@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface Accept {
 
-    public int value();
+    public int value() default 1;
 
     public String showAs() default "";
 }
