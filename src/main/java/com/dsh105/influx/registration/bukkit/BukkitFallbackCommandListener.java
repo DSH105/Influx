@@ -23,11 +23,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
-public class FallbackCommandListener implements Listener {
+public class BukkitFallbackCommandListener implements Listener {
 
     private final CommandMap fallback;
 
-    public FallbackCommandListener(CommandMap commandMap) {
+    public BukkitFallbackCommandListener(CommandMap commandMap) {
         this.fallback = commandMap;
     }
 

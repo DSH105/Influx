@@ -24,11 +24,11 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.help.HelpTopic;
 import java.util.List;
 
-public class InfluxCommandHelpTopic extends HelpTopic {
+public class InfluxBukkitCommandHelpTopic extends HelpTopic {
 
-    private InfluxCommand command;
+    private InfluxBukkitCommand command;
 
-    public InfluxCommandHelpTopic(InfluxCommand command) {
+    public InfluxBukkitCommandHelpTopic(InfluxBukkitCommand command) {
         this.command = command;
 
         if (command.getLabel().startsWith(command.getManager().getCommandPrefix())) {

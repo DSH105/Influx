@@ -20,10 +20,10 @@ package com.dsh105.influx.registration.bukkit;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.help.HelpTopicFactory;
 
-public class InfluxCommandHelpTopicFactory implements HelpTopicFactory<InfluxCommand> {
+public class InfluxBukkitCommandHelpTopicFactory implements HelpTopicFactory<InfluxBukkitCommand> {
 
     @Override
-    public HelpTopic createTopic(InfluxCommand influxCommand) {
-        return new InfluxCommandHelpTopic(influxCommand);
+    public HelpTopic createTopic(InfluxBukkitCommand influxBukkitCommand) {
+        return new InfluxBukkitCommandHelpTopic(influxBukkitCommand);
     }
 }

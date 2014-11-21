@@ -31,7 +31,7 @@ import java.lang.reflect.Field;
 public class BukkitRegistry extends Registry {
 
     static {
-        Bukkit.getHelpMap().registerHelpTopicFactory(InfluxCommand.class, new InfluxCommandHelpTopicFactory());
+        Bukkit.getHelpMap().registerHelpTopicFactory(InfluxBukkitCommand.class, new InfluxBukkitCommandHelpTopicFactory());
     }
 
     private static Field SERVER_COMMAND_MAP;
@@ -53,7 +53,7 @@ public class BukkitRegistry extends Registry {
                 getManager().getPlugin().getLogger().warning("Failed to retrieve CommandMap! Using fallback instead...");
 
                 commandMap = new SimpleCommandMap(Bukkit.getServer());
-                Bukkit.getPluginManager().registerEvents(new FallbackCommandListener(commandMap), getManager().getPlugin());
+                Bukkit.getPluginManager().registerEvents(new BukkitFallbackCommandListener(commandMap), getManager().getPlugin());
             }
         }
 
@@ -67,10 +67,10 @@ public class BukkitRegistry extends Registry {
 
     @Override
     public boolean register(Controller controller) {
-        return super.register(controller) && register(new InfluxCommand(getManager(), controller));
+        return super.register(controller) && register(new InfluxBukkitCommand(getManager(), controller));
     }
 
-    public boolean register(InfluxCommand command) {
+    public boolean register(InfluxBukkitCommand command) {
         if (!getCommandMap().register(getManager().getPlugin().getName(), command)) {
             unregister(command);
             return false;
@@ -78,7 +78,7 @@ public class BukkitRegistry extends Registry {
         return true;
     }
 
-    public boolean unregister(InfluxCommand command) {
+    public boolean unregister(InfluxBukkitCommand command) {
         Affirm.notNull(command, "Command must not be null.");
         return command.unregister(getCommandMap());
     }
@@ -87,8 +87,8 @@ public class BukkitRegistry extends Registry {
     public boolean unregister(String command) {
         if (super.unregister(command)) {
             org.bukkit.command.Command bukkitCommand = getCommandMap().getCommand(command);
-            if (bukkitCommand != null && bukkitCommand instanceof InfluxCommand) {
-                return unregister((InfluxCommand) bukkitCommand);
+            if (bukkitCommand != null && bukkitCommand instanceof InfluxBukkitCommand) {
+                return unregister((InfluxBukkitCommand) bukkitCommand);
             }
         }
         return false;

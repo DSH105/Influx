@@ -20,9 +20,7 @@ package com.dsh105.influx.registration.bukkit;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.Description;
 import com.dsh105.influx.InfluxBukkitManager;
-import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.dispatch.BukkitDispatcher;
-import com.dsh105.influx.dispatch.Dispatcher;
 import com.dsh105.influx.syntax.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
@@ -30,15 +28,15 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 
-public class InfluxCommand extends org.bukkit.command.Command implements PluginIdentifiableCommand {
+public class InfluxBukkitCommand extends org.bukkit.command.Command implements PluginIdentifiableCommand {
 
     private final InfluxBukkitManager manager;
 
-    public InfluxCommand(InfluxBukkitManager manager, Controller controller) {
+    public InfluxBukkitCommand(InfluxBukkitManager manager, Controller controller) {
         this(manager, controller.getCommand(), controller.getDescription());
     }
 
-    public InfluxCommand(InfluxBukkitManager manager, Command command, Description description) {
+    public InfluxBukkitCommand(InfluxBukkitManager manager, Command command, Description description) {
         super(command.getCommandName(), description.getShortDescription(), description.getUsage()[0], new ArrayList<>(command.getAliasNames()));
         this.manager = manager;
     }
