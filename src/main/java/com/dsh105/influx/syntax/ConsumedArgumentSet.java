@@ -18,7 +18,6 @@
 package com.dsh105.influx.syntax;
 
 import com.dsh105.commodus.StringUtil;
-import com.dsh105.influx.util.ArgumentSplitter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +37,7 @@ public class ConsumedArgumentSet {
     public ConsumedArgumentSet(Syntax candidate, String input) {
         this.candidate = candidate;
         this.input = input;
-        this.arguments = new ArgumentSplitter(input).getArguments();
+        this.arguments = new ArgumentParser(this.input).getArguments();
 
         this.candidates.add(candidate);
         if (candidate instanceof Command) {
@@ -104,48 +103,48 @@ public class ConsumedArgumentSet {
                 }
             }
 
+            int consumed = parameter instanceof Variable ? ((Variable) parameter).getArgumentsAccepted() : 1;
+
             try {
                 String arguments = this.arguments[nextParameter];
                 if (parameter instanceof Variable) {
-                    arguments = StringUtil.combineArray(nextParameter, nextParameter + ((Variable) parameter).getArgumentsAccepted(), " ", this.arguments);
+                    arguments = StringUtil.combineArray(nextParameter, nextParameter + consumed, " ", this.arguments);
                 }
 
                 if (!parameter.verify(arguments)) {
-                    return false;
+                    // May be a variable parameter that isn't specified
+                    throw new VerificationException();
                 }
                 consumedArguments = arguments;
-            } catch (ArrayIndexOutOfBoundsException e) {
+            } catch (ArrayIndexOutOfBoundsException | VerificationException e) {
                 if (!parameter.isOptional()) {
                     return false;
                 }
 
                 if (parameter instanceof Variable) {
                     Variable variable = (Variable) parameter;
-                    // Is this optional parameter in the middle?
-                    // If so, does it have a default value?
-                    if (i < syntaxLength - 1) {
-                        if (variable.getDefaultValue() == null) {
-                            // Optional parameters must have a default value unless they are the last parameter
+                    // Optional parameters must have a default value unless they are the last parameter
+                    if (variable.getDefaultValue() == null) {
+                        // Is this optional parameter in the middle?
+                        // If so, does it have a default value?
+                        if (i < syntaxLength - 1) {
                             return false;
                         }
-                        nextParameter -= variable.getArgumentsAccepted();
+                        consumedArguments = "";
+                    } else {
                         consumedArguments = variable.getDefaultValue();
                     }
+                    consumed -= variable.getArgumentsAccepted();
                 }
 
             }
-
-            int consumed = 1;
-            if (parameter instanceof Variable) {
-                consumed = ((Variable) parameter).getArgumentsAccepted();
-            }
-            nextParameter += consumed;
 
             if (consumedArguments == null) {
                 return false;
             }
 
-            consume(parameter, new ArgumentSplitter(consumedArguments).getArguments());
+            nextParameter += consumed;
+            consume(parameter, new ArgumentParser(consumedArguments).getArguments());
         }
 
         return true;

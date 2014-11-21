@@ -15,14 +15,14 @@
  * along with Influx.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.dsh105.influx.util;
+package com.dsh105.influx.syntax;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ArgumentSplitter {
+public class ArgumentParser {
 
     private static final Pattern ARGUMENT_PATTERN = Pattern.compile("([^\\s\"']+)|\"([^\"]*)\"|'([^']*)'");
 
@@ -30,7 +30,7 @@ public class ArgumentSplitter {
     private List<String> argumentList;
     private String[] arguments;
 
-    public ArgumentSplitter(String input) {
+    public ArgumentParser(String input) {
         this.input = input;
         this.argumentList = new ArrayList<>();
         Matcher splitter = ARGUMENT_PATTERN.matcher(this.input);

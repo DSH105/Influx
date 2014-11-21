@@ -17,8 +17,6 @@
 
 package com.dsh105.influx.syntax;
 
-import com.dsh105.influx.util.ArgumentSplitter;
-
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -69,7 +67,7 @@ public class Variable extends Parameter {
 
     @Override
     public boolean verify(String parameter) {
-        return new ArgumentSplitter(parameter).getArguments().length == getArgumentsAccepted() && (!isRegexEnabled() || parameter.matches(getRegex()));
+        return new ArgumentParser(parameter).getArguments().length == getArgumentsAccepted() && (!isRegexEnabled() || parameter.matches(getRegex()));
     }
 
     @Override

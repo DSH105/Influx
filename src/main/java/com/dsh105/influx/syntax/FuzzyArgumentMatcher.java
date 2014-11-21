@@ -19,7 +19,7 @@ package com.dsh105.influx.syntax;
 
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
-import com.dsh105.influx.util.ArgumentSplitter;
+import com.dsh105.influx.util.Comparators;
 
 import java.util.*;
 
@@ -29,17 +29,17 @@ public class FuzzyArgumentMatcher {
     private String input;
     private String[] arguments;
 
-    private SortedMap<Controller, SortedSet<Syntax>> candidates = new TreeMap<>();
+    private SortedMap<Controller, SortedSet<Syntax>> candidates = new TreeMap<>(new Comparators.ControllerComparator());
     private SortedMap<Integer, SortedSet<Controller>> possibleMatches = new TreeMap<>();
 
     public FuzzyArgumentMatcher(InfluxManager<?> manager, String input) {
         this.manager = manager;
         this.input = input;
-        this.arguments = new ArgumentSplitter(input).getArguments();
+        this.arguments = new ArgumentParser(input).getArguments();
 
-        this.possibleMatches.put(0, new TreeSet<Controller>());
+        this.possibleMatches.put(0, new TreeSet<>(new Comparators.ControllerComparator()));
         for (Controller controller : manager.getMappedCommands()) {
-            SortedSet<Syntax> set = new TreeSet<>();
+            SortedSet<Syntax> set = new TreeSet<>(new Comparators.CommandComparator());
             set.add(controller.getCommand());
             set.addAll(controller.getCommand().getAliases());
             candidates.put(controller, set);
@@ -57,7 +57,7 @@ public class FuzzyArgumentMatcher {
     }
 
     public SortedSet<Controller> getAllPossibleMatches() {
-        SortedSet<Controller> possibleMatches = new TreeSet<>();
+        SortedSet<Controller> possibleMatches = new TreeSet<>(new Comparators.ControllerComparator());
         for (SortedSet<Controller> set : this.possibleMatches.values()) {
             possibleMatches.addAll(set);
         }
@@ -112,7 +112,7 @@ public class FuzzyArgumentMatcher {
     private void possibleMatch(int index, Controller candidate) {
         SortedSet<Controller> candidates = possibleMatches.get(index);
         if (candidates == null) {
-            candidates = new TreeSet<>();
+            candidates = new TreeSet<>(new Comparators.ControllerComparator());
         }
         candidates.add(candidate);
         possibleMatches.put(index, candidates);
