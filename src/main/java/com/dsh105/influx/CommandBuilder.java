@@ -27,7 +27,7 @@ import com.dsh105.influx.syntax.Command;
 import com.dsh105.influx.syntax.CommandBinding;
 import com.dsh105.influx.syntax.IllegalSyntaxException;
 import com.dsh105.influx.util.GeneralUtil;
-import com.google.common.base.Preconditions;
+import com.dsh105.influx.util.Affirm;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -60,8 +60,8 @@ public class CommandBuilder {
     }
 
     public CommandBuilder from(CommandListener listener, String methodName, Class<?>... parameterTypes) throws IllegalCommandException {
-        Preconditions.checkNotNull(listener, "Listener must not be null.");
-        Preconditions.checkNotNull(methodName, "Method name must not be null.");
+        Affirm.notNull(listener, "Listener must not be null.");
+        Affirm.notNull(methodName, "Method name must not be null.");
 
         this.originListener = listener;
         this.commandBinding = new AnnotatedCommandBinding(this.originListener, methodName, parameterTypes);
@@ -85,13 +85,13 @@ public class CommandBuilder {
     }
 
     public CommandBuilder syntax(String syntax) {
-        Preconditions.checkNotNull(syntax, "Syntax must not be null.");
+        Affirm.notNull(syntax, "Syntax must not be null.");
         this.syntax = syntax.trim();
         return this;
     }
 
     public CommandBuilder describeAs(String shortDescription, String... longDescription) {
-        Preconditions.checkNotNull(shortDescription, "Short description must not be null.");
+        Affirm.notNull(shortDescription, "Short description must not be null.");
         this.shortDescription = shortDescription;
         this.longDescription = longDescription != null ? longDescription : new String[0];
         return this;
@@ -103,7 +103,7 @@ public class CommandBuilder {
     }
 
     public CommandBuilder prioritise(Priority.Type priority) {
-        Preconditions.checkNotNull(priority, "Priority must not be null.");
+        Affirm.notNull(priority, "Priority must not be null.");
         this.priority = priority;
         return this;
     }
@@ -123,7 +123,7 @@ public class CommandBuilder {
     }
 
     public CommandBuilder callUsing(CommandInvoker commandInvoker) {
-        Preconditions.checkNotNull(commandInvoker, "Command invoker must not be null.");
+        Affirm.notNull(commandInvoker, "Command invoker must not be null.");
         this.commandInvoker = commandInvoker;
         return this;
     }
@@ -173,12 +173,12 @@ public class CommandBuilder {
     }
 
     public Controller build(CommandListener destinationListener) throws IllegalCommandException {
-        Preconditions.checkNotNull(originListener, "Command has not been bound to a originListener.");
-        Preconditions.checkNotNull(syntax, "Valid syntax has not been provided.");
-        Preconditions.checkNotNull(shortDescription, "Description has not been provided");
-        Preconditions.checkNotNull(commandBinding, "Command has not been bound to a method or originListener.");
-        Description description = new Description(shortDescription, longDescription, usage);
-        Command command = null;
+        Affirm.notNull(originListener, "Command has not been bound to a originListener.");
+        Affirm.notNull(syntax, "Valid syntax has not been provided.");
+        Affirm.notNull(shortDescription, "Description has not been provided");
+        Affirm.notNull(commandBinding, "Command has not been bound to a method or originListener.");
+        Description description = new Description(shortDescription, longDescription, usage, hidden);
+        Command command;
         try {
             command = new Command(originListener, GeneralUtil.getSenderTypeFor(commandBinding.getCallableMethod()), syntax, commandBinding, permissions, priority, aliases);
         } catch (IllegalSyntaxException e) {

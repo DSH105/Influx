@@ -21,8 +21,7 @@ import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.help.entry.HelpEntry;
-import com.dsh105.powermessage.core.PowerMessage;
-import com.google.common.base.Preconditions;
+import com.dsh105.influx.util.Affirm;
 
 import java.util.*;
 
@@ -95,7 +94,7 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
     }
 
     protected boolean add(H entry) {
-        Preconditions.checkNotNull(entry, "Help entry must not be null.");
+        Affirm.notNull(entry, "Help entry must not be null.");
 
         String group = entry.getController().getDescription().getHelpGroup();
         SortedSet<H> groupEntries = groupToEntriesMap.get(group);

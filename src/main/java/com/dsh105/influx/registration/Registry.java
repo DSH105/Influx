@@ -19,7 +19,7 @@ package com.dsh105.influx.registration;
 
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
-import com.google.common.base.Preconditions;
+import com.dsh105.influx.util.Affirm;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +52,7 @@ public class Registry {
     }
 
     public boolean register(Controller controller) {
-        Preconditions.checkNotNull(controller, "Controller must not be null.");
+        Affirm.notNull(controller, "Controller must not be null.");
         return !registeredCommands.contains(controller.getCommand().getCommandName()) && registeredCommands.add(controller.getCommand().getCommandName());
     }
 

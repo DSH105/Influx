@@ -23,7 +23,7 @@ import com.dsh105.influx.conversion.Converter;
 import com.dsh105.influx.conversion.UnboundConverter;
 import com.dsh105.influx.syntax.ContextualVariable;
 import com.dsh105.influx.syntax.ParameterBinding;
-import com.google.common.primitives.Primitives;
+import com.dsh105.influx.util.Primitive;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -77,7 +77,7 @@ public class InjectedInvoker extends CommandInvoker {
                 }
 
                 for (Converter<?> converter : PRIMITIVE_CONVERTERS) {
-                    if (converter.getParameterType().isAssignableFrom(Primitives.wrap(methodParameter))) {
+                    if (converter.getParameterType().isAssignableFrom(Primitive.wrap(methodParameter))) {
                         parameters[i] = converter.safelyConvert(variable);
                         continue parameterIteration;
                     }

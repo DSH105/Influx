@@ -17,7 +17,7 @@
 
 package com.dsh105.influx.syntax;
 
-import com.google.common.base.Preconditions;
+import com.dsh105.influx.util.Affirm;
 
 public class Range {
 
@@ -29,9 +29,9 @@ public class Range {
     }
 
     public Range(int startIndex, int endIndex) {
-        Preconditions.checkArgument(startIndex >= 0, "Invalid index for range: " + startIndex);
-        Preconditions.checkArgument(endIndex >= 0, "Invalid index for range: " + endIndex);
-        Preconditions.checkArgument(startIndex <= endIndex, String.format("endIndex (%s) must be greater than startIndex (%s)", endIndex, startIndex));
+        Affirm.isTrue(startIndex >= 0, "Invalid index for range: " + startIndex);
+        Affirm.isTrue(endIndex >= 0, "Invalid index for range: " + endIndex);
+        Affirm.isTrue(startIndex <= endIndex, String.format("endIndex (%s) must be greater than startIndex (%s)", endIndex, startIndex));
         this.startIndex = startIndex;
         this.endIndex = endIndex;
     }

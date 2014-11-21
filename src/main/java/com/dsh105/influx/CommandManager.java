@@ -27,9 +27,8 @@ import com.dsh105.influx.registration.Registry;
 import com.dsh105.influx.response.DefaultResponder;
 import com.dsh105.influx.response.Responder;
 import com.dsh105.influx.response.ResponseLevel;
+import com.dsh105.influx.util.Affirm;
 import com.dsh105.influx.util.Replacer;
-import com.google.common.base.Preconditions;
-import org.bukkit.material.Sandstone;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -88,7 +87,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     @Override
     public void setRegistrationStrategy(RegistrationStrategy strategy) {
-        Preconditions.checkNotNull(strategy, "Registration strategy must not be null.");
+        Affirm.notNull(strategy, "Registration strategy must not be null.");
         this.setRegistrationStrategy(strategy.prepare(this));
     }
 
@@ -99,7 +98,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     @Override
     public void setRegistrationStrategy(Registry registry) {
-        Preconditions.checkNotNull(registry, "Registry must not be null.");
+        Affirm.notNull(registry, "Registry must not be null.");
         if (this.registry != null) {
             this.registry.unregisterAll();
         }
@@ -109,13 +108,13 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     @Override
     public void setHelpProvision(HelpProvision provision) {
-        Preconditions.checkNotNull(provision, "Help provision strategy must not be null.");
+        Affirm.notNull(provision, "Help provision strategy must not be null.");
         this.help = provision.newProvider(this);
     }
 
     @Override
     public void setHelpProvision(HelpProvider<?, S> provider) {
-        Preconditions.checkNotNull(provider, "Help provider must not be null.");
+        Affirm.notNull(provider, "Help provider must not be null.");
         this.help = provider;
     }
 
@@ -126,7 +125,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     @Override
     public <T extends S> void setResponseHandler(Responder<T> responder) {
-        Preconditions.checkNotNull(responder, "Response handler must not be null.");
+        Affirm.notNull(responder, "Response handler must not be null.");
         this.responder = (Responder<S>) responder;
     }
 
@@ -142,20 +141,20 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     @Override
     public <T extends S> void setAuthorization(Authorization<T> authorization) {
-        Preconditions.checkNotNull(authorization, "Authorization must not be null.");
+        Affirm.notNull(authorization, "Authorization must not be null.");
         this.authorization = (Authorization<S>) authorization;
     }
 
     @Override
     public void setMessage(MessagePurpose purpose, String value) {
-        Preconditions.checkNotNull(purpose, "Purpose must not be null.");
-        Preconditions.checkNotNull(value, "Message must not be null.");
+        Affirm.notNull(purpose, "Purpose must not be null.");
+        Affirm.notNull(value, "Message must not be null.");
         this.messages.put(purpose, value);
     }
 
     @Override
     public String getMessage(MessagePurpose purpose, Object... pairedReplacements) {
-        Preconditions.checkNotNull(purpose, "Purpose must not be null.");
+        Affirm.notNull(purpose, "Purpose must not be null.");
         if (!messages.containsKey(purpose)) {
             messages.put(purpose, purpose.getDefaultValue());
         }
@@ -169,7 +168,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     @Override
     public void setHelpTitle(String helpTitle) {
-        Preconditions.checkNotNull(helpTitle, "Help title must not be null.");
+        Affirm.notNull(helpTitle, "Help title must not be null.");
         this.helpTitle = helpTitle;
     }
 

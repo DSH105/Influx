@@ -18,7 +18,7 @@
 package com.dsh105.influx.response;
 
 import com.dsh105.powermessage.markup.MarkupBuilder;
-import com.google.common.base.Preconditions;
+import com.dsh105.influx.util.Affirm;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -50,7 +50,7 @@ public class BukkitResponder extends Responder<CommandSender> {
     }
 
     public ChatColor getResponseColor(int index, ChatColor... scheme) {
-        Preconditions.checkNotNull(scheme, "Format scheme must not be null.");
+        Affirm.notNull(scheme, "Format scheme must not be null.");
         if (index > scheme.length) {
             return ChatColor.WHITE;
         }

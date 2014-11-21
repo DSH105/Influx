@@ -17,7 +17,7 @@
 
 package com.dsh105.influx.syntax;
 
-import com.google.common.base.Preconditions;
+import com.dsh105.influx.util.Affirm;
 
 import java.util.*;
 
@@ -54,7 +54,7 @@ public class Syntax implements Comparable<Syntax>, Iterable<Parameter> {
     }
 
     protected void buildSyntax(String stringSyntax) throws IllegalSyntaxException {
-        Preconditions.checkNotNull(stringSyntax, "Syntax must not be null.");
+        Affirm.notNull(stringSyntax, "Syntax must not be null.");
         this.stringSyntax = stringSyntax;
         this.syntax = new SyntaxBuilder(getStringSyntax(), getCommandBinding()).getParameters();
         parameterNameMap.clear();

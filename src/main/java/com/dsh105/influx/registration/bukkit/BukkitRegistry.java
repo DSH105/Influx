@@ -21,7 +21,7 @@ import com.dsh105.commodus.reflection.Reflection;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxBukkitManager;
 import com.dsh105.influx.registration.Registry;
-import com.google.common.base.Preconditions;
+import com.dsh105.influx.util.Affirm;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
@@ -79,7 +79,7 @@ public class BukkitRegistry extends Registry {
     }
 
     public boolean unregister(InfluxCommand command) {
-        Preconditions.checkNotNull(command, "Command must not be null.");
+        Affirm.notNull(command, "Command must not be null.");
         return command.unregister(getCommandMap());
     }
 

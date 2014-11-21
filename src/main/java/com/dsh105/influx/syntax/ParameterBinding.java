@@ -18,7 +18,7 @@
 package com.dsh105.influx.syntax;
 
 import com.dsh105.influx.conversion.Converter;
-import com.google.common.base.Preconditions;
+import com.dsh105.influx.util.Affirm;
 
 public class ParameterBinding {
 
@@ -145,8 +145,7 @@ public class ParameterBinding {
         }
 
         public ParameterBinding build() {
-            Preconditions.checkNotNull(bindingType, "Binding type must not be null.");
-            Preconditions.checkNotNull(boundParameter, "Bound parameter must not be null.");
+            Affirm.notNull(bindingType, "Binding type must not be null.");
             return new ParameterBinding(bindingType, boundParameter, alternateName, regex, converter, argumentsAccepted, defaultValue);
         }
     }

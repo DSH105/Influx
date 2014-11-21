@@ -19,7 +19,7 @@ package com.dsh105.influx.syntax;
 
 import com.dsh105.influx.CommandListener;
 import com.dsh105.influx.annotation.Priority;
-import com.google.common.base.Preconditions;
+import com.dsh105.influx.util.Affirm;
 
 import java.util.*;
 
@@ -123,7 +123,7 @@ public class Command extends Syntax {
     }
 
     public void addPermissions(String... permissions) {
-        Preconditions.checkNotNull(permissions, "Parent permissions must not be null.");
+        Affirm.notNull(permissions, "Parent permissions must not be null.");
         Collections.addAll(this.permissions, permissions);
     }
 
