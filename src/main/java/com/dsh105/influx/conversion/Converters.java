@@ -18,10 +18,12 @@
 package com.dsh105.influx.conversion;
 
 import com.dsh105.commodus.GeneralUtil;
+import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.syntax.ContextualVariable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class Converters {
 
@@ -89,6 +91,22 @@ public class Converters {
                 return false;
             }
             throw new ConversionException("\"" + variable.getConsumedValue() + "\" is not a valid flag.");
+        }
+    }
+
+    public static class UUIDConverter extends Converter<UUID> {
+
+        public UUIDConverter() {
+            super(UUID.class);
+        }
+
+        @Override
+        public UUID convert(ContextualVariable variable) throws ConversionException {
+            try {
+                return StringUtil.convertUUID(variable.getConsumedValue());
+            } catch (IllegalArgumentException e) {
+                throw new ConversionException("\"" + variable.getConsumedValue() + "\" is not a valid UUID.", e);
+            }
         }
     }
 }
