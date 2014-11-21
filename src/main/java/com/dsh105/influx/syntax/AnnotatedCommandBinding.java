@@ -31,12 +31,12 @@ public class AnnotatedCommandBinding extends CommandBinding {
 
     private CommandListener originListener;
     private String methodName;
-    private Class<?>[] parameters;
+    private Class<?>[] methodParameters;
 
-    public AnnotatedCommandBinding(CommandListener originListener, String methodName, Class<?>... parameters) throws IllegalCommandException {
+    public AnnotatedCommandBinding(CommandListener originListener, String methodName, Class<?>... methodParameters) throws IllegalCommandException {
         this.originListener = originListener;
         this.methodName = methodName;
-        this.parameters = parameters;
+        this.methodParameters = methodParameters;
         prepare();
     }
 
@@ -48,7 +48,7 @@ public class AnnotatedCommandBinding extends CommandBinding {
     public Method prepareCallable() throws IllegalCommandException {
         Method method = null;
         try {
-            method = getOriginListener().getClass().getDeclaredMethod(methodName, parameters);
+            method = getOriginListener().getClass().getDeclaredMethod(methodName, methodParameters);
         } catch (NoSuchMethodException ignored) {
             // Ignore...for now
         }
@@ -61,8 +61,7 @@ public class AnnotatedCommandBinding extends CommandBinding {
     }
 
     @Override
-    public Map<Integer, ParameterBinding> prepareBindings() {
-        Map<Integer, ParameterBinding> bindings = new HashMap<>();
+    public void prepareBindings() {
         for (int i = 1; i < getParameters().length; i++) {
             Class<?> parameter = getParameters()[i];
             ParameterBinding.Builder bindingBuilder = new ParameterBinding.Builder().ofType(parameter);
@@ -85,11 +84,8 @@ public class AnnotatedCommandBinding extends CommandBinding {
                 }
             }
 
-            if (bindingBuilder.getBoundParameter() != null) {
-                bindings.put(i, bindingBuilder.build());
-            }
+            bind(i, bindingBuilder.build(), bindingBuilder.getBoundParameter() == null);
         }
-        return bindings;
     }
 
     public static boolean isValid(Method candidate) {

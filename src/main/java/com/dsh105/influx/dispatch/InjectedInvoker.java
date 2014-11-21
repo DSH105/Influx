@@ -59,21 +59,26 @@ public class InjectedInvoker extends CommandInvoker {
                 Class<?> methodParameter = methodParameters[i];
 
                 ParameterBinding parameterBinding = controller.getCommandBinding().getBinding(i);
-                ContextualVariable variable = context.getVariable(parameterBinding.getBoundParameter());
+                ContextualVariable variable = null;
+                if (parameterBinding != null) {
+                    variable = context.getVariable(parameterBinding.getBoundParameter());
+                }
                 if (variable == null) {
-                    if (!UnboundConverter.class.isAssignableFrom(parameterBinding.getBindingType())) {
-                        throw new CommandInvocationException("Parameter binding requested an invalid variable: " + parameterBinding.getBoundParameter());
+                    ParameterBinding looseParameterBinding = controller.getCommandBinding().getBinding(i, true);
+                    if (looseParameterBinding == null || !UnboundConverter.class.isAssignableFrom(looseParameterBinding.getConverter())) {
+                        throw new CommandInvocationException("Parameter binding requested an invalid loose converter: " + (looseParameterBinding == null ? "index " + i : looseParameterBinding.getcon() + " is not an UnboundConverter"));
                     }
                     try {
-                        parameters[i] = ((UnboundConverter) parameterBinding.getConverter().newInstance()).convert(context);
+                        parameters[i] = ((UnboundConverter) looseParameterBinding.getConverter().newInstance()).convert(context);
+                        continue;
                     } catch (InstantiationException | IllegalAccessException e) {
-                        throw new CommandInvocationException("Failed to instantiate unbound converter (" + parameterBinding.getBindingType().getCanonicalName() + "): default constructor not available");
+                        throw new CommandInvocationException("Failed to instantiate unbound converter (" + looseParameterBinding.getBindingType().getCanonicalName() + "): default constructor not available");
                     }
                 }
 
                 if (methodParameter.isAssignableFrom(variable.getConsumedValue().getClass())) {
                     parameters[i] = variable.getConsumedValue();
-                    break;
+                    continue;
                 }
 
                 for (Converter<?> converter : PRIMITIVE_CONVERTERS) {
@@ -86,8 +91,9 @@ public class InjectedInvoker extends CommandInvoker {
                 Converter converter = null;
                 if (parameterBinding.getConverter() != null) {
                     try {
-                        converter = parameterBinding.getConverter().newInstance();
-                    } catch (InstantiationException | IllegalAccessException e) {
+                        converter = parameterBinding.getConverter().getConstructor().newInstance();
+                    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                        e.printStackTrace();
                         for (Class<?> converterType : getConverters().keySet()) {
                             if (converterType.isAssignableFrom(parameterBinding.getBindingType())) {
                                 converter = getConverters().get(converterType);

@@ -22,18 +22,20 @@ import com.dsh105.influx.IllegalCommandException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class CommandBinding {
 
     private Class<?>[] parameters;
-    private Map<Integer, ParameterBinding> bindings;
+    private Map<Integer, ParameterBinding> bindings = new HashMap<>();
+    private Map<Integer, ParameterBinding> looseBindings = new HashMap<>();
     private Method callableMethod;
 
     protected void prepare() throws IllegalCommandException {
         this.callableMethod = prepareCallable();
         this.parameters = callableMethod.getParameterTypes();
-        this.bindings = prepareBindings();
+        this.prepareBindings();
     }
 
     public Method getCallableMethod() {
@@ -44,33 +46,52 @@ public abstract class CommandBinding {
         return parameters;
     }
 
+    protected void bind(int position, ParameterBinding binding, boolean loose) {
+        (loose ? looseBindings : bindings).put(position, binding);
+    }
+
     public Map<Integer, ParameterBinding> getBindings() {
-        return Collections.unmodifiableMap(bindings);
+        return getBindings(false);
+    }
+
+    public Map<Integer, ParameterBinding> getBindings(boolean loose) {
+        return Collections.unmodifiableMap(loose ? looseBindings : bindings);
     }
 
     public ParameterBinding getBinding(int index) {
-        return getBindings().get(index);
+        return getBinding(index, false);
     }
 
-    public ParameterBinding getBinding(Parameter parameter) {
-        if (parameter instanceof Variable) {
-            return getBinding(parameter.getName() + (parameter.isContinuous() ? "..." : ""));
-        }
-        return null;
+    public ParameterBinding getBinding(int index, boolean loose) {
+        return getBindings(loose).get(index);
     }
 
     public ParameterBinding getBinding(String parameterName) {
-        for (ParameterBinding binding : getBindings().values()) {
+        return getBinding(parameterName, false);
+    }
+
+    public ParameterBinding getBinding(String parameterName, boolean loose) {
+        for (ParameterBinding binding : getBindings(loose).values()) {
             if (binding.getBoundParameter().equals(parameterName)) {
                 return binding;
             }
         }
         return null;
     }
+    public ParameterBinding getBinding(Parameter parameter) {
+        return getBinding(parameter, false);
+    }
+
+    public ParameterBinding getBinding(Parameter parameter, boolean loose) {
+        if (parameter instanceof Variable) {
+            return getBinding(parameter.getName() + (parameter.isContinuous() ? "..." : ""), loose);
+        }
+        return null;
+    }
 
     public abstract Method prepareCallable() throws IllegalCommandException;
 
-    public abstract Map<Integer, ParameterBinding> prepareBindings();
+    public abstract void prepareBindings();
 
     @Override
     public String toString() {
