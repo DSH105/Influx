@@ -18,7 +18,6 @@
 package com.dsh105.influx;
 
 import com.dsh105.influx.help.HelpProvider;
-import com.google.common.base.Preconditions;
 
 import java.util.Arrays;
 
@@ -28,11 +27,13 @@ public class Description {
     private String[] longDescription;
     private String[] usage;
     private String helpGroup = HelpProvider.DEFAULT;
+    private boolean hidden;
 
-    public Description(String shortDescription, String[] longDescription, String[] usage) {
+    public Description(String shortDescription, String[] longDescription, String[] usage, boolean hidden) {
         this.shortDescription = shortDescription;
         this.longDescription = longDescription;
         this.usage = usage;
+        this.hidden = hidden;
     }
 
     public String getShortDescription() {
@@ -61,6 +62,10 @@ public class Description {
 
     public void setHelpGroup(String helpGroup) {
         this.helpGroup = helpGroup != null ? helpGroup : HelpProvider.DEFAULT;
+    }
+
+    public boolean isHidden() {
+        return hidden;
     }
 
     @Override

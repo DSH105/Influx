@@ -215,7 +215,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
     @Override
     public Controller nestCommandIn(CommandListener destination, CommandBuilder builder, String... parentNests) {
         Controller controller = super.nestCommandIn(destination, builder, parentNests);
-        if (controller != null) {
+        if (controller != null && !controller.getDescription().isHidden()) {
             getHelp().add(controller);
         }
         return controller;

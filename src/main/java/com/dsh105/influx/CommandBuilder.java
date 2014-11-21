@@ -18,6 +18,7 @@
 package com.dsh105.influx;
 
 import com.dsh105.influx.annotation.Authorize;
+import com.dsh105.influx.annotation.Hidden;
 import com.dsh105.influx.annotation.Nested;
 import com.dsh105.influx.annotation.Priority;
 import com.dsh105.influx.dispatch.CommandInvoker;
@@ -39,6 +40,7 @@ public class CommandBuilder {
     private String shortDescription;
     private String[] longDescription = new String[0];
     private String[] usage = new String[0];
+    private boolean hidden;
     private Priority.Type priority = Priority.Type.NORMAL;
     private CommandInvoker commandInvoker = new InjectedInvoker();
     private CommandBinding commandBinding;
@@ -80,6 +82,7 @@ public class CommandBuilder {
         if (method.isAnnotationPresent(Priority.class)) {
             prioritise(method.getAnnotation(Priority.class).value());
         }
+        this.hidden = method.isAnnotationPresent(Hidden.class);
 
         return this;
     }
@@ -99,6 +102,11 @@ public class CommandBuilder {
 
     public CommandBuilder usage(String... usage) {
         this.usage = usage != null ? usage : new String[0];
+        return this;
+    }
+
+    public CommandBuilder hide(boolean flag) {
+        this.hidden = flag;
         return this;
     }
 
@@ -146,6 +154,10 @@ public class CommandBuilder {
 
     public String[] getUsage() {
         return usage;
+    }
+
+    public boolean isHidden() {
+        return hidden;
     }
 
     public Priority.Type getPriority() {
