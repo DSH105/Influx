@@ -42,10 +42,10 @@ public class Suggestion {
                 break;
             }
 
-            if (!this.suggestions.contains(controller.getCommand().getReadableSyntax())) {
+            if (!this.suggestions.contains(controller.getCommand().getAcceptedStringSyntax())) {
                 Command command = controller.getCommand();
                 String[] parts = command.getStringSyntax().split("\\s+");
-                String[] parts2 = command.getReadableSyntax().split("\\s+");
+                String[] parts2 = command.getAcceptedStringSyntax().split("\\s+");
 
                 int maxIndex = command.getIndexOf(command.getFirstVariable(), false);
                 if (maxIndex < 0) maxIndex = parts.length;
@@ -55,7 +55,7 @@ public class Suggestion {
                 String suggestion = StringUtil.combineArray(0, maxIndex, " ", parts);
                 String suggestion2 = StringUtil.combineArray(0, maxIndex2, " ", parts);
                 if (getInput().startsWith(suggestion) || getInput().startsWith(suggestion2)) {
-                    this.suggestions.add(command.getReadableSyntax());
+                    this.suggestions.add(command.getAcceptedStringSyntax());
                 }
             }
         }

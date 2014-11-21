@@ -18,11 +18,8 @@
 package com.dsh105.influx.help.entry;
 
 import com.dsh105.influx.Controller;
-import com.dsh105.influx.Description;
 import com.dsh105.influx.help.HelpProvider;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -62,7 +59,7 @@ public class HelpEntry implements Comparable<HelpEntry> {
     }
 
     public String getCommandSyntax() {
-        return controller.getCommand().getReadableSyntax();
+        return controller.getCommand().getAcceptedStringSyntax();
     }
 
     public Set<String> getPermissions() {

@@ -119,7 +119,7 @@ public class BukkitHelpProvider<S extends CommandSender> extends HelpProvider<Bu
     @Override
     public List<String> getHelpFor(Controller controller) {
         List<String> help = new ArrayList<>();
-        String fullCommand = getManager().getCommandPrefix() + controller.getCommand().getReadableSyntax();
+        String fullCommand = getManager().getCommandPrefix() + controller.getCommand().getAcceptedStringSyntax();
         BukkitHelpEntry helpEntry = getHelpEntry(controller);
         if (helpEntry == null) {
             help.add(getManager().getMessage(MessagePurpose.NO_HELP_FOUND, "<command>", fullCommand));
@@ -146,9 +146,10 @@ public class BukkitHelpProvider<S extends CommandSender> extends HelpProvider<Bu
 
             switch (matcher.group(1)) {
                 case "command":
-                    powerMessage.then(manager.getResponder().format(manager.getCommandPrefix() + helpEntry.getController().getCommand().getReadableSyntax(), false))
+                    powerMessage.then(manager.getResponder().format(manager.getCommandPrefix() + helpEntry.getController().getCommand().getAcceptedStringSyntax(), false))
+                            .colour(ChatColor.UNDERLINE)
                             .tooltip(manager.getResponder().format("{c2}Click to auto-complete"))
-                            .suggest(helpEntry.getController().getCommand().getReadableSyntax());
+                            .suggest(helpEntry.getController().getCommand().getAcceptedStringSyntax());
                     break;
                 case "alias_num":
                     powerMessage.then(aliases + " alias" + (aliases == 1 ? "" : "es") + "");

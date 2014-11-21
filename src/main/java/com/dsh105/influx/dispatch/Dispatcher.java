@@ -125,14 +125,14 @@ public class Dispatcher<S> {
 
             if (!result) {
                 for (String part : context.getController().getDescription().getUsage()) {
-                    context.respond(part.replace("<command>", getManager().getCommandPrefix() + context.getCommand().getReadableSyntax()));
+                    context.respond(part.replace("<command>", getManager().getCommandPrefix() + context.getCommand().getAcceptedStringSyntax()));
                 }
             }
         } catch (ConversionException | ResponseUnsupportedException e) {
             context.respond(e.getMessage(), ResponseLevel.SEVERE);
         } catch (Exception e) {
-            context.respond(getManager().getMessage(MessagePurpose.UNEXPECTED_ERROR), ResponseLevel.SEVERE);
-            throw new CommandDispatchException("Unhandled exception executing \""  + context.getCommand().getReadableSyntax() + "\" (from \"" + context.getInput() + "\")", e);
+            //context.respond(getManager().getMessage(MessagePurpose.UNEXPECTED_ERROR), ResponseLevel.SEVERE);
+            throw new CommandDispatchException("Unhandled exception executing \""  + context.getCommand().getAcceptedStringSyntax() + "\" (\"" + context.getInput() + "\")", e);
         }
         return true;
     }

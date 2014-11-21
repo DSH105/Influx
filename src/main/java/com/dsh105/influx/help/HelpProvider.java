@@ -190,7 +190,7 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
 
     public List<String> getHelpFor(Controller controller) {
         List<String> help = new ArrayList<>();
-        String fullCommand = getManager().getCommandPrefix() + controller.getCommand().getReadableSyntax();
+        String fullCommand = getManager().getCommandPrefix() + controller.getCommand().getAcceptedStringSyntax();
         H helpEntry = getHelpEntry(controller);
         if (helpEntry != null) {
             help.add("Aliases (" + controller.getCommand().getAliases().size() + "): " + StringUtil.combine("{c1}, {c2}", controller.getCommand().getReadableStringAliases()));

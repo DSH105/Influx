@@ -98,7 +98,7 @@ public class Command extends Syntax {
     public List<String> getReadableStringAliases() {
         List<String> stringAliases = new ArrayList<>();
         for (Syntax syntax : getAliases()) {
-            stringAliases.add(syntax.getReadableSyntax());
+            stringAliases.add(syntax.getAcceptedStringSyntax());
         }
         return Collections.unmodifiableList(stringAliases);
     }

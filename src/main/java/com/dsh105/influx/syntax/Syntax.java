@@ -81,7 +81,7 @@ public class Syntax implements Comparable<Syntax>, Iterable<Parameter> {
         return stringSyntax;
     }
 
-    public String getReadableSyntax() {
+    public String getAcceptedStringSyntax() {
         if (getVariables().isEmpty()) {
             return stringSyntax;
         }
