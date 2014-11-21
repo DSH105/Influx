@@ -120,7 +120,8 @@ public class CommandManagementTest {
 
         String[][] commands = {
                 {"influx help", "influx help 2", "influx help help", "influx help something 3"},
-                {"influx voxel 1 2 3", "influx voxel 1 2 3 false", "influx voxel true"}
+                {"influx voxel 1 2 3", "influx voxel 1 2 3 false", "influx voxel true"},
+                {"influx", "influx hi", "influx hi hi"}
         };
 
         for (int i = 0; i < commands.length; i++) {

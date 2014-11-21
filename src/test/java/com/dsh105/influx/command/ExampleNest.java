@@ -22,7 +22,6 @@ import com.dsh105.influx.annotation.*;
 import com.dsh105.influx.dispatch.CommandContext;
 
 import java.util.SortedMap;
-import java.util.SortedSet;
 
 @Nest(nests = {"influx", "i"})
 @Authorize("influx.nest")
@@ -62,7 +61,7 @@ public class ExampleNest implements CommandListener {
     }
 
     @Command(
-            syntax = "help <command>",
+            syntax = "help <command...>",
             desc = "Retrieve help on a certain command",
             aliases = {"h <command>"},
             help = {
@@ -72,7 +71,7 @@ public class ExampleNest implements CommandListener {
     @Nested
     // Again, this one interacts with the manager
     public boolean helpCommand(CommandContext<MockSender> context) {
-        String command = context.getInput();
+        String command = context.var("command");
         SortedMap<Controller, String[]> matches = context.getManager().getHelp().getHelpFor(command);
         if (matches.isEmpty()) {
             context.respond("No help found for \"" + command + "\".");
@@ -83,7 +82,7 @@ public class ExampleNest implements CommandListener {
 
         for (Controller controller : matches.keySet()) {
             System.out.println('\n');
-            context.respondAnonymously("++ Help :: !" + controller.getCommand().getReadableSyntax() + " ++");
+            context.respondAnonymously("++ Help :: !" + controller.getCommand().getAcceptedStringSyntax() + " ++");
             context.getManager().getHelp().sendHelpFor(context.sender(), controller);
         }
         return true;
@@ -108,6 +107,41 @@ public class ExampleNest implements CommandListener {
     @Nested
     public boolean voxel(CommandContext context, @Bind("voxel") @Accept(value = 3, showAs = "<x> <y> <z>") @Default("3 2 1") @Convert(Voxel.Converter.class) Voxel voxel, @Bind("flag") boolean flag) {
         context.respond("Voxel position located: " + voxel + " with flag: " + flag);
+        return true;
+    }
+
+    @Command(
+            syntax = "<yay> [option]",
+            desc = "A test command"
+    )
+    public boolean test(CommandContext context) {
+        return true;
+    }
+
+    @Command(
+            syntax = "create <pet>",
+            desc = "A test command"
+    )
+    public boolean test1(CommandContext context) {
+        return true;
+    }
+
+    @Command(
+            syntax = "<type> [name] [data]",
+            desc = "A test command"
+    )
+    @Priority(Priority.Type.LOWEST)
+    public boolean test2(CommandContext context) {
+        return true;
+    }
+
+    @Command(
+            syntax = "[opt1] [opt2]",
+            desc = "A test command"
+    )
+    @Priority(Priority.Type.HIGHEST)
+    public boolean opt(CommandContext context, @Bind("opt1") @Default("yaaaay") String opt1, @Bind("opt2") @Default("wooooo") String opt2) {
+        context.respond(context.var("opt1") + "  -  " + context.var("opt2"));
         return true;
     }
 
