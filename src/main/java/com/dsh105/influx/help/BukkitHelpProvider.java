@@ -47,7 +47,7 @@ public class BukkitHelpProvider<S extends CommandSender> extends HelpProvider<Bu
     public void buildHeader() {
         StringBuilder header = new StringBuilder();
         header.append(ChatColor.translateAlternateColorCodes('&', getManager().getMessage(MessagePurpose.BUKKIT_HELP_HEADER)));
-        for (int i = header.length(); i < ChatPaginator.GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH; i++) {
+        for (int i = header.length(); i < /*ChatPaginator.GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH*/ 5; i++) {
             header.append("-");
         }
         this.setHeader(header.toString());
