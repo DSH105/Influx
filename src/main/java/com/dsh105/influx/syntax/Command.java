@@ -174,18 +174,6 @@ public class Command extends Syntax {
     }
 
     @Override
-    public int compareTo(Syntax syntax) {
-        if (syntax instanceof Command) {
-            int priorityDiff = getPriority().ordinal() - ((Command) syntax).getPriority().ordinal();
-            if (priorityDiff != 0) {
-                return priorityDiff;
-            }
-        }
-
-        return super.compareTo(syntax);
-    }
-
-    @Override
     public String toString() {
         return "Command{" +
                 "originalStringSyntax='" + originalStringSyntax + "'" +

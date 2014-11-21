@@ -17,6 +17,8 @@
 
 package com.dsh105.influx;
 
+import com.dsh105.influx.util.Comparators;
+
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -26,7 +28,7 @@ public abstract class CommandMapping implements InfluxMapping {
 
     @Override
     public SortedSet<Controller> getMappedCommands() {
-        SortedSet<Controller> mapped = new TreeSet<>();
+        SortedSet<Controller> mapped = new TreeSet<>(new Comparators.ControllerComparator());
         for (Set<Controller> commandSet : commands.values()) {
             mapped.addAll(commandSet);
         }
@@ -102,10 +104,15 @@ public abstract class CommandMapping implements InfluxMapping {
             throw new IllegalArgumentException("Manager can only have commands accepting the following generic type: " + getSenderType().getSimpleName() + " (not " + controller.getCommand().getAcceptedSenderType() + ")");
         }
 
+        if (exists(controller)) {
+            return null;
+        }
+
         TreeSet<Controller> mappedCommands = commands.get(controller.getRegisteredListener());
         if (mappedCommands == null) {
-            mappedCommands = new TreeSet<>();
+            mappedCommands = new TreeSet<>(new Comparators.ControllerComparator());
         }
+
 
         if (mappedCommands.add(controller)) {
             commands.put(controller.getRegisteredListener(), mappedCommands);
@@ -144,17 +151,6 @@ public abstract class CommandMapping implements InfluxMapping {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void updateCommandNesting(Controller controller, String... parents) {
-        if (!exists(controller)) {
-            return;
-        }
-
-        getRegistry().unregister(controller);
-        controller.getCommand().nestUnder(parents);
-        getRegistry().register(controller);
     }
 
     @Override

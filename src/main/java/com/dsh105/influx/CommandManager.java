@@ -238,4 +238,17 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
         }
         return false;
     }
+
+    @Override
+    public void updateCommandNesting(Controller controller, String... parents) {
+        if (!exists(controller)) {
+            return;
+        }
+
+        getRegistry().unregister(controller);
+        getHelp().remove(controller);
+        controller.getCommand().nestUnder(parents);
+        getRegistry().register(controller);
+        getHelp().add(controller);
+    }
 }

@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Note: this class has a natural ordering that is inconsistent with equals.
  */
-public class Parameter implements Comparable<Parameter> {
+public class Parameter {
 
     private String name;
     protected Range range;
@@ -80,24 +80,6 @@ public class Parameter implements Comparable<Parameter> {
 
     public boolean isContinuous() {
         return false;
-    }
-
-    @Override
-    public int compareTo(Parameter parameter) {
-        if (isContinuous() != parameter.isContinuous()) {
-            return isContinuous() ? 1 : -1;
-        }
-
-        if (isOptional() != parameter.isOptional()) {
-            return isOptional() ? 1 : -1;
-        }
-
-        if (containsInnerVariables() != parameter.containsInnerVariables()) {
-            return containsInnerVariables() ? 1 : -1;
-        }
-
-        int sizeDiff = getInnerVariables().size() - parameter.getInnerVariables().size();
-        return sizeDiff != 0 ? sizeDiff : 0;
     }
 
     @Override

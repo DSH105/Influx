@@ -21,6 +21,7 @@ import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.help.entry.HelpEntry;
+import com.dsh105.influx.util.Comparators;
 import com.dsh105.influx.util.Affirm;
 
 import java.util.*;
@@ -176,7 +177,7 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
     }
 
     public SortedMap<Controller, String[]> getHelpFor(String input) {
-        SortedMap<Controller, String[]> help = new TreeMap<>();
+        SortedMap<Controller, String[]> help = new TreeMap<>(new Comparators.ControllerComparator());
         SortedSet<Controller> matches = getManager().getDispatcher().findFuzzyMatches(input);
 
         for (Controller controller : matches) {

@@ -107,21 +107,6 @@ public class Variable extends Parameter {
     }
 
     @Override
-    public int compareTo(Parameter parameter) {
-        if (parameter instanceof Variable) {
-            int paramComparison = super.compareTo(parameter);
-            if (paramComparison != 0) {
-                return paramComparison;
-            }
-            if (isRegexEnabled() == ((Variable) parameter).isRegexEnabled()) {
-                return 0;
-            }
-            return isRegexEnabled() ? -1 : 1;
-        }
-        return -1;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Variable)) return false;

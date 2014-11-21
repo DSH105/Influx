@@ -25,7 +25,7 @@ import com.dsh105.influx.syntax.Command;
 /**
  * Note: this class has a natural ordering that is inconsistent with equals.
  */
-public class Controller implements Comparable<Controller> {
+public class Controller {
 
     private CommandListener registeredListener;
     private Command command;
@@ -67,40 +67,11 @@ public class Controller implements Comparable<Controller> {
     }
 
     @Override
-    public int compareTo(Controller controller) {
-        return getCommand().compareTo(controller.getCommand());
-    }
-
-    @Override
     public String toString() {
         return "Controller{" +
                 "registeredListener=" + registeredListener +
                 ", command=" + command +
                 ", description=" + description +
                 "}";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Controller)) return false;
-
-        Controller that = (Controller) o;
-
-        if (!commandInvoker.equals(that.commandInvoker)) return false;
-        if (!command.equals(that.command)) return false;
-        if (!commandBinding.equals(that.commandBinding)) return false;
-        if (!description.equals(that.description)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = command.hashCode();
-        result = 31 * result + description.hashCode();
-        result = 31 * result + commandBinding.hashCode();
-        result = 31 * result + commandInvoker.hashCode();
-        return result;
     }
 }

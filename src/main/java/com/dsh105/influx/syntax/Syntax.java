@@ -24,7 +24,7 @@ import java.util.*;
 /**
  * Note: this class has a natural ordering that is inconsistent with equals.
  */
-public class Syntax implements Comparable<Syntax>, Iterable<Parameter> {
+public class Syntax implements Iterable<Parameter> {
 
     protected String stringSyntax;
     protected List<Parameter> syntax;
@@ -194,24 +194,6 @@ public class Syntax implements Comparable<Syntax>, Iterable<Parameter> {
 
     public Parameter getFinalParameter() {
         return getParameter(getSyntax().size() - 1, false);
-    }
-
-    @Override
-    public int compareTo(Syntax syntax) {
-        for (int i = 0; i < getSyntax().size() && i < syntax.getSyntax().size(); i++) {
-            Parameter parameter = getSyntax().get(i);
-            Parameter parameter2 = syntax.getSyntax().get(i);
-            int parameterComparison = parameter.compareTo(parameter2);
-            if (parameterComparison != 0) {
-                return parameterComparison;
-            }
-        }
-        int sizeDiff = syntax.getSyntax().size() - getSyntax().size();
-        int varPos = getFirstVariable() != null ? getFirstVariable().getRange().getStartIndex() : 0;
-        int varPos2 = syntax.getFirstVariable() != null ? syntax.getFirstVariable().getRange().getStartIndex() : 0;
-
-        int varDiff = varPos - varPos2;
-        return sizeDiff != 0 ? sizeDiff : (varDiff != 0 ? varDiff : (equals(syntax) ? 0 : 1));
     }
 
     @Override
