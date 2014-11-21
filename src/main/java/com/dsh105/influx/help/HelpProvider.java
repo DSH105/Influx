@@ -21,8 +21,8 @@ import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.help.entry.HelpEntry;
-import com.dsh105.influx.util.Comparators;
 import com.dsh105.influx.util.Affirm;
+import com.dsh105.influx.util.Comparators;
 
 import java.util.*;
 

@@ -25,7 +25,6 @@ import com.dsh105.influx.help.ExpandedHelpProvider;
 import com.dsh105.influx.help.HelpProvision;
 import com.dsh105.influx.registration.RegistrationStrategy;
 import com.dsh105.influx.response.ResponseLevel;
-import com.dsh105.influx.response.ResponseUnsupportedException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.junit.Test;

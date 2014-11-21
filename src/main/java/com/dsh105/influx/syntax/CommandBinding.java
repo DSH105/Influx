@@ -78,6 +78,7 @@ public abstract class CommandBinding {
         }
         return null;
     }
+
     public ParameterBinding getBinding(Parameter parameter) {
         return getBinding(parameter, false);
     }

@@ -19,14 +19,11 @@ package com.dsh105.influx;
 
 import com.dsh105.influx.dispatch.Authorization;
 import com.dsh105.influx.dispatch.BukkitDispatcher;
-import com.dsh105.influx.dispatch.Dispatcher;
 import com.dsh105.influx.help.BukkitHelpProvider;
 import com.dsh105.influx.help.HelpProvision;
 import com.dsh105.influx.registration.RegistrationStrategy;
 import com.dsh105.influx.response.BukkitResponder;
 import com.dsh105.influx.response.MessagePurpose;
-import com.dsh105.influx.response.Responder;
-import com.dsh105.influx.response.ResponseLevel;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 

@@ -71,10 +71,12 @@ public class FuzzyArgumentMatcher {
     private void compareFuzzily() {
         // Only compares parameters, not variables
 
-        controllerIter: for (Controller controller : candidates.keySet()) {
+        controllerIter:
+        for (Controller controller : candidates.keySet()) {
             SortedSet<Syntax> syntaxSet = candidates.get(controller);
             if (syntaxSet != null && !syntaxSet.isEmpty()) {
-                syntaxIter: for (Syntax syntax : candidates.get(controller)) {
+                syntaxIter:
+                for (Syntax syntax : candidates.get(controller)) {
                     int syntaxLength = syntax.getSyntax().size();
                     for (int i = 0; i < syntaxLength; i++) {
                         Parameter parameter = syntax.getParameter(i, false);

@@ -24,8 +24,6 @@ import com.dsh105.influx.dispatch.CommandContext;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 public class AnnotatedCommandBinding extends CommandBinding {
 

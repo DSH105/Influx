@@ -17,10 +17,8 @@
 
 package com.dsh105.influx.help;
 
-import com.dsh105.commodus.reflection.Reflection;
 import com.dsh105.influx.InfluxBukkitManager;
 import com.dsh105.influx.InfluxManager;
-import org.bukkit.command.CommandSender;
 
 public enum HelpProvision {
 
@@ -33,7 +31,8 @@ public enum HelpProvision {
         switch (this) {
             case EXPANDED:
                 return new ExpandedHelpProvider<>(manager, this);
-            case BUKKIT: case BUKKIT_CONDENSED:
+            case BUKKIT:
+            case BUKKIT_CONDENSED:
                 if (manager instanceof InfluxBukkitManager) {
                     return new BukkitHelpProvider<>((InfluxBukkitManager) manager, this);
                 }

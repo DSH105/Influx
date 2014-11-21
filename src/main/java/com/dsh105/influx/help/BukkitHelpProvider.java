@@ -21,13 +21,12 @@ import com.dsh105.commodus.StringUtil;
 import com.dsh105.commodus.paginator.Paginator;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
-import com.dsh105.influx.help.entry.BukkitHelpEntry;
 import com.dsh105.influx.help.entry.BukkitExpandedHelpEntry;
+import com.dsh105.influx.help.entry.BukkitHelpEntry;
 import com.dsh105.influx.response.MessagePurpose;
 import com.dsh105.powermessage.core.PowerMessage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.util.ChatPaginator;
 
 import java.util.ArrayList;
 import java.util.List;

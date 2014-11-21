@@ -17,13 +17,10 @@
 
 package com.dsh105.influx.response;
 
-import com.dsh105.powermessage.markup.MarkupBuilder;
 import com.dsh105.influx.util.Affirm;
+import com.dsh105.powermessage.core.PowerMessage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class BukkitResponder extends Responder<CommandSender> {
 
@@ -37,7 +34,7 @@ public class BukkitResponder extends Responder<CommandSender> {
 
     @Override
     public void handleResponse(CommandSender sender, String message, ResponseLevel level) {
-        new MarkupBuilder().withText(message).build().send(sender);
+        new PowerMessage(message).send(sender);
     }
 
     @Override

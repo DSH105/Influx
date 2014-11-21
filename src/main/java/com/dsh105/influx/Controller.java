@@ -19,8 +19,8 @@ package com.dsh105.influx;
 
 import com.dsh105.influx.dispatch.CommandInvoker;
 import com.dsh105.influx.dispatch.InjectedInvoker;
-import com.dsh105.influx.syntax.CommandBinding;
 import com.dsh105.influx.syntax.Command;
+import com.dsh105.influx.syntax.CommandBinding;
 
 /**
  * Note: this class has a natural ordering that is inconsistent with equals.

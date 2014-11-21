@@ -72,7 +72,7 @@ public class Voxel {
         @Override
         public Voxel convert(ContextualVariable variable) throws ConversionException {
             int[] coordinates = new int[3];
-            for (int i = 0; i < 3 ; i++) {
+            for (int i = 0; i < 3; i++) {
                 try {
                     coordinates[i] = GeneralUtil.toInteger(variable.getConsumedArguments()[i]);
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {

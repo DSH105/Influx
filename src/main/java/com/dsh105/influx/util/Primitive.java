@@ -53,6 +53,6 @@ public class Primitive {
 
     public static <T> Class<T> unwrap(Class<T> wrapper) {
         Class<T> primitive = (Class<T>) WRAPPER_TO_PRIMIIVE.get(wrapper);
-        return primitive  != null ? primitive  : wrapper;
+        return primitive != null ? primitive : wrapper;
     }
 }

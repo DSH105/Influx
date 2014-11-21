@@ -52,5 +52,6 @@ public interface InfluxMapping extends Iterable<Controller> {
 
     boolean unregister(Controller controller);
 
+    // WARNING: Expensive process
     void updateCommandNesting(Controller controller, String... parents);
 }

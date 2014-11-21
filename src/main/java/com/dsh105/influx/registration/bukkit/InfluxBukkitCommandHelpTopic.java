@@ -22,6 +22,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.help.HelpTopic;
+
 import java.util.List;
 
 public class InfluxBukkitCommandHelpTopic extends HelpTopic {

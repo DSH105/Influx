@@ -18,7 +18,6 @@
 package com.dsh105.influx.command;
 
 import com.dsh105.influx.CommandListener;
-import com.dsh105.influx.annotation.Bind;
 import com.dsh105.influx.annotation.Command;
 import com.dsh105.influx.dispatch.CommandContext;
 

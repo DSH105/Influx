@@ -43,10 +43,10 @@ public class ConsumedArgumentSet {
         if (candidate instanceof Command) {
             this.candidates.addAll(((Command) candidate).getAliases());
         }
-        
+
         this.matches = compare();
     }
-    
+
     public String[] getConsumedArguments(Parameter parameter) {
         return consumedArguments.get(parameter.getFullName());
     }

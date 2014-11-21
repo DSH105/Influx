@@ -27,11 +27,13 @@ import com.dsh105.influx.syntax.AnnotatedCommandBinding;
 import com.dsh105.influx.syntax.Command;
 import com.dsh105.influx.syntax.CommandBinding;
 import com.dsh105.influx.syntax.IllegalSyntaxException;
-import com.dsh105.influx.util.GeneralUtil;
 import com.dsh105.influx.util.Affirm;
+import com.dsh105.influx.util.GeneralUtil;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CommandBuilder {
 

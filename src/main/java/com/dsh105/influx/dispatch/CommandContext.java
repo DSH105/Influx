@@ -213,7 +213,7 @@ public class CommandContext<S> {
     public String arg(int index, Range argumentRange) {
         String[] arguments = args(argumentRange);
         if (index >= getArguments().length) {
-            throw new ArrayIndexOutOfBoundsException("Argument " + index + " does not exist in range "  + argumentRange.getStartIndex() + "-" + argumentRange.getEndIndex() + ".");
+            throw new ArrayIndexOutOfBoundsException("Argument " + index + " does not exist in range " + argumentRange.getStartIndex() + "-" + argumentRange.getEndIndex() + ".");
         }
         return arguments[index];
     }

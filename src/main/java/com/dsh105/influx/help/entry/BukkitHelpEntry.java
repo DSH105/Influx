@@ -19,15 +19,11 @@ package com.dsh105.influx.help.entry;
 
 import com.dsh105.commodus.paginator.Pageable;
 import com.dsh105.influx.Controller;
-import com.dsh105.influx.Description;
 import com.dsh105.influx.help.BukkitHelpProvider;
 import com.dsh105.influx.help.HelpProvider;
 import com.dsh105.influx.response.MessagePurpose;
 import com.dsh105.powermessage.core.PowerMessage;
 import org.bukkit.command.CommandSender;
-
-import java.util.List;
-import java.util.Set;
 
 public class BukkitHelpEntry extends HelpEntry implements Pageable {
 

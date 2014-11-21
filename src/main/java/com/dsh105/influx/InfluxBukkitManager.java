@@ -18,7 +18,6 @@
 package com.dsh105.influx;
 
 import com.dsh105.influx.dispatch.BukkitDispatcher;
-import com.dsh105.influx.dispatch.Dispatcher;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 

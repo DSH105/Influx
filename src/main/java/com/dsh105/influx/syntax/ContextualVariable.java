@@ -20,9 +20,6 @@ package com.dsh105.influx.syntax;
 import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.dispatch.CommandContext;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class ContextualVariable extends Variable {
 
     private CommandContext<?> context;

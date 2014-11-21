@@ -17,15 +17,9 @@
 
 package com.dsh105.influx.help.entry;
 
-import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.Controller;
-import com.dsh105.influx.Description;
-import com.dsh105.influx.help.BukkitHelpProvider;
 import com.dsh105.influx.help.HelpProvider;
 import com.dsh105.influx.response.MessagePurpose;
-
-import java.util.List;
-import java.util.Set;
 
 public class BukkitExpandedHelpEntry extends BukkitHelpEntry {
 
@@ -37,7 +31,7 @@ public class BukkitExpandedHelpEntry extends BukkitHelpEntry {
     public void reformat() {
         super.reformat();
         if (getLongDescription().length != 0) {
-                getMessage().tooltip(getLongDescription());
+            getMessage().tooltip(getLongDescription());
         }
     }
 

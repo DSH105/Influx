@@ -21,9 +21,9 @@ import com.dsh105.commodus.StringUtil;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.conversion.ConversionException;
+import com.dsh105.influx.help.Suggestion;
 import com.dsh105.influx.response.MessagePurpose;
 import com.dsh105.influx.response.ResponseLevel;
-import com.dsh105.influx.help.Suggestion;
 import com.dsh105.influx.response.ResponseUnsupportedException;
 import com.dsh105.influx.syntax.*;
 
@@ -132,7 +132,7 @@ public class Dispatcher<S> {
             context.respond(e.getMessage(), ResponseLevel.SEVERE);
         } catch (Exception e) {
             //context.respond(getManager().getMessage(MessagePurpose.UNEXPECTED_ERROR), ResponseLevel.SEVERE);
-            throw new CommandDispatchException("Unhandled exception executing \""  + context.getCommand().getAcceptedStringSyntax() + "\" (\"" + context.getInput() + "\")", e);
+            throw new CommandDispatchException("Unhandled exception executing \"" + context.getCommand().getAcceptedStringSyntax() + "\" (\"" + context.getInput() + "\")", e);
         }
         return true;
     }

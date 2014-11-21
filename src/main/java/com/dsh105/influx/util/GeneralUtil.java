@@ -17,8 +17,6 @@
 
 package com.dsh105.influx.util;
 
-import com.dsh105.commodus.reflection.Reflection;
-import com.dsh105.influx.BukkitCommandManager;
 import com.dsh105.influx.CommandManager;
 import com.dsh105.influx.InfluxBukkitManager;
 import com.dsh105.influx.InfluxManager;
@@ -26,7 +24,6 @@ import com.dsh105.influx.InfluxManager;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 
 public class GeneralUtil {
 

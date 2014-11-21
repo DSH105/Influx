@@ -66,7 +66,7 @@ public class InjectedInvoker extends CommandInvoker {
                 if (variable == null) {
                     ParameterBinding looseParameterBinding = controller.getCommandBinding().getBinding(i, true);
                     if (looseParameterBinding == null || !UnboundConverter.class.isAssignableFrom(looseParameterBinding.getConverter())) {
-                        throw new CommandInvocationException("Parameter binding requested an invalid loose converter: " + (looseParameterBinding == null ? "index " + i : looseParameterBinding.getcon() + " is not an UnboundConverter"));
+                        throw new CommandInvocationException("Parameter binding requested an invalid loose converter: " + (looseParameterBinding == null ? "index " + i : looseParameterBinding.getConverter() + " is not an UnboundConverter"));
                     }
                     try {
                         parameters[i] = ((UnboundConverter) looseParameterBinding.getConverter().newInstance()).convert(context);

@@ -67,7 +67,7 @@ public class BukkitConverters {
             }
 
             double[] coords = new double[5];
-            for (int i = 1; i < 6 ; i++) {
+            for (int i = 1; i < 6; i++) {
                 try {
                     coords[i - 1] = GeneralUtil.toDouble(variable.getConsumedArguments()[i]);
                 } catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {

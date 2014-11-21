@@ -163,13 +163,15 @@ public class Syntax implements Iterable<Parameter> {
         return Collections.unmodifiableList(parameters);
     }
 
-    @Deprecated // this method isn't safe to use with params changing positions all over the place (not good for aliases!)
+    @Deprecated
+    // this method isn't safe to use with params changing positions all over the place (not good for aliases!)
     public Parameter getParameter(int index) {
         return getParameter(index, true);
     }
 
     // Positions aren't necessarily guaranteed to be the same
-    @Deprecated // this method isn't safe to use with params changing positions all over the place (not good for aliases!)
+    @Deprecated
+    // this method isn't safe to use with params changing positions all over the place (not good for aliases!)
     public Parameter getParameter(int index, boolean allowIndexFixing) {
         int searchIndex = index + (allowIndexFixing ? startIndex : 0);
         if (searchIndex >= getSyntax().size()) {
