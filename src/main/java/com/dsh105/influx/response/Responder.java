@@ -68,8 +68,8 @@ public abstract class Responder<S> {
 
     public <T extends S> void respond(T sender, String message, ResponseLevel level) {
         String response = message;
-        if (!getResponsePrefix().isEmpty()) {
-            response = getResponsePrefix() + " " + format(message);
+        if (!responsePrefix.isEmpty()) {
+            response = responsePrefix + " " + format(message);
         }
         respondAnonymously(sender, response, level);
     }

@@ -46,13 +46,13 @@ public class AnnotatedCommandBinding extends CommandBinding {
     public Method prepareCallable() throws IllegalCommandException {
         Method method = null;
         try {
-            method = getOriginListener().getClass().getDeclaredMethod(methodName, methodParameters);
+            method = originListener.getClass().getDeclaredMethod(methodName, methodParameters);
         } catch (NoSuchMethodException ignored) {
             // Ignore...for now
         }
 
         if (method == null || !isValid(method)) {
-            throw new IllegalCommandException("Provided method is invalid: " + getOriginListener().getClass().getName() + "#" + methodName);
+            throw new IllegalCommandException("Provided method is invalid: " + originListener.getClass().getName() + "#" + methodName);
         }
 
         return method;

@@ -63,7 +63,7 @@ public class Command extends Syntax {
     }
 
     public boolean acceptsSender(Class<?> senderType) {
-        return getAcceptedSenderType().isAssignableFrom(senderType);
+        return acceptedSender.isAssignableFrom(senderType);
     }
 
     public Set<Syntax> getAliases() {

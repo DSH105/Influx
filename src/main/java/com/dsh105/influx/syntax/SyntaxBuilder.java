@@ -55,7 +55,7 @@ public class SyntaxBuilder {
                     throw new IllegalSyntaxException("Invalid variable: " + variableMatcher.group(0));
                 }
                 if (variableNames.contains(parameter.getName())) {
-                    throw new IllegalSyntaxException("Command variables cannot have identical names. \"" + parameter.getName() + "\" found more than once in \"" + getCommandSyntax() + "\".");
+                    throw new IllegalSyntaxException("Command variables cannot have identical names. \"" + parameter.getName() + "\" found more than once in \"" + this.commandSyntax + "\".");
                 }
                 variableNames.add(parameter.getName());
             } else {
@@ -109,7 +109,7 @@ public class SyntaxBuilder {
 
     private Variable buildVariable(Matcher matcher, int index) throws IllegalVerificationException {
         String name = matcher.group(2);
-        ParameterBinding binding = getCommandBinding() == null ? null : getCommandBinding().getBinding(name);
+        ParameterBinding binding = commandBinding == null ? null : commandBinding.getBinding(name);
         String regex = "";
         String defaultValue = null;
         int argumentsAccepted = 1;

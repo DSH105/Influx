@@ -183,7 +183,7 @@ public class CommandBuilder {
     }
 
     public Controller build() throws IllegalCommandException {
-        return build(getOriginListener());
+        return build(originListener);
     }
 
     public Controller build(CommandListener destinationListener) throws IllegalCommandException {
@@ -202,7 +202,7 @@ public class CommandBuilder {
     }
 
     public Controller build(String... parents) throws IllegalCommandException {
-        return build(getOriginListener(), parents);
+        return build(originListener, parents);
     }
 
     public Controller build(CommandListener destinationListener, String... parents) throws IllegalCommandException {

@@ -146,7 +146,7 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
         if (this.defaultEntryListing == null || this.defaultEntryListing.isEmpty()) {
             StringBuilder builder = new StringBuilder();
             for (H entry : getEntries(DEFAULT)) {
-                if (sender != null && restrictByPermission() && !getManager().authorize(sender, entry.getController(), entry.getPermissions())) {
+                if (sender != null && restrictByPermission() && !manager.authorize(sender, entry.getController(), entry.getPermissions())) {
                     continue;
                 }
 
@@ -166,19 +166,19 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
     }
 
     public <T extends S> void sendPage(T sender, int page) {
-        getManager().respondAnonymously(sender, "Commands: {c2}" + getDefaultEntryListing(sender));
-        getManager().respondAnonymously(sender, "Valid command groups: {c2}" + StringUtil.combine("{c1}, {c2}", groupToEntriesMap.keySet()));
+        manager.respondAnonymously(sender, "Commands: {c2}" + getDefaultEntryListing(sender));
+        manager.respondAnonymously(sender, "Valid command groups: {c2}" + StringUtil.combine("{c1}, {c2}", groupToEntriesMap.keySet()));
     }
 
     public <T extends S> void sendHelpFor(T sender, Controller controller) {
         for (String part : getHelpFor(controller)) {
-            getManager().respondAnonymously(sender, part);
+            manager.respondAnonymously(sender, part);
         }
     }
 
     public SortedMap<Controller, String[]> getHelpFor(String input) {
         SortedMap<Controller, String[]> help = new TreeMap<>(new Comparators.ControllerComparator());
-        SortedSet<Controller> matches = getManager().getDispatcher().findFuzzyMatches(input);
+        SortedSet<Controller> matches = manager.getDispatcher().findFuzzyMatches(input);
 
         for (Controller controller : matches) {
             List<String> controllerHelp = getHelpFor(controller);
@@ -191,7 +191,7 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
 
     public List<String> getHelpFor(Controller controller) {
         List<String> help = new ArrayList<>();
-        String fullCommand = getManager().getCommandPrefix() + controller.getCommand().getAcceptedStringSyntax();
+        String fullCommand = manager.getCommandPrefix() + controller.getCommand().getAcceptedStringSyntax();
         H helpEntry = getHelpEntry(controller);
         if (helpEntry != null) {
             help.add("Aliases (" + controller.getCommand().getAliases().size() + "): " + StringUtil.combine("{c1}, {c2}", controller.getCommand().getReadableStringAliases()));

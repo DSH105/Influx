@@ -45,15 +45,15 @@ public class Range {
     }
 
     public int getSize() {
-        return getEndIndex() - getStartIndex();
+        return endIndex - startIndex;
     }
 
     public boolean isBefore(Range range) {
-        return getStartIndex() < range.getStartIndex();
+        return startIndex < range.startIndex;
     }
 
     public boolean isAfter(Range range) {
-        return getStartIndex() > range.getStartIndex();
+        return startIndex > range.startIndex;
     }
 
     @Override

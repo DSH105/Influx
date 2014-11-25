@@ -50,11 +50,11 @@ public class BukkitHelpEntry extends HelpEntry implements Pageable {
 
     @Override
     public String getContent() {
-        return getMessage().getContent();
+        return message.getContent();
     }
 
     @Override
     public Pageable send(CommandSender sender) {
-        return getMessage().send(sender);
+        return message.send(sender);
     }
 }

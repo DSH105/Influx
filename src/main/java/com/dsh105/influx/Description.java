@@ -49,11 +49,11 @@ public class Description {
     }
 
     public String getShortUsage() {
-        if (getUsage().length <= 0) {
+        if (usage.length <= 0) {
             return "";
         }
 
-        return getUsage()[0];
+        return usage[0];
     }
 
     public String getHelpGroup() {

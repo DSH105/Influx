@@ -199,13 +199,13 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     @Override
     public <T extends S> boolean authorize(T sender, Controller toExecute, String permission) {
-        return getAuthorization().authorize(sender, toExecute, permission);
+        return authorization.authorize(sender, toExecute, permission);
     }
 
     @Override
     public <T extends S> boolean authorize(T sender, Controller toExecute, Collection<String> permissions) {
         for (String permission : permissions) {
-            if (!getAuthorization().authorize(sender, toExecute, permission)) {
+            if (!authorization.authorize(sender, toExecute, permission)) {
                 return false;
             }
         }
@@ -216,7 +216,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
     public Controller nestCommandIn(CommandListener destination, CommandBuilder builder, String... parentNests) {
         Controller controller = super.nestCommandIn(destination, builder, parentNests);
         if (controller != null && !controller.getDescription().isHidden()) {
-            getHelp().add(controller);
+            help.add(controller);
         }
         return controller;
     }
@@ -225,7 +225,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
     public List<Controller> unregister(CommandListener listener) {
         List<Controller> unregistered = super.unregister(listener);
         for (Controller controller : unregistered) {
-            getHelp().remove(controller);
+            help.remove(controller);
         }
         return unregistered;
     }
@@ -233,7 +233,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
     @Override
     public boolean unregister(Controller controller) {
         if (super.unregister(controller)) {
-            getHelp().remove(controller);
+            help.remove(controller);
             return true;
         }
         return false;
@@ -245,10 +245,10 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
             return;
         }
 
-        getRegistry().unregister(controller);
-        getHelp().remove(controller);
+        registry.unregister(controller);
+        help.remove(controller);
         controller.getCommand().nestUnder(parents);
-        getRegistry().register(controller);
-        getHelp().add(controller);
+        registry.register(controller);
+        help.add(controller);
     }
 }

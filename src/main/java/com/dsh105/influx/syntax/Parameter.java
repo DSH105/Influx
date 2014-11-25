@@ -51,7 +51,7 @@ public class Parameter {
     }
 
     public String getFullName() {
-        return getName();
+        return name;
     }
 
     public String getName() {
@@ -71,7 +71,7 @@ public class Parameter {
     }
 
     public boolean verify(String parameter) {
-        return getName().equalsIgnoreCase(parameter);
+        return name.equalsIgnoreCase(parameter);
     }
 
     public boolean isOptional() {

@@ -67,7 +67,7 @@ public class Variable extends Parameter {
 
     @Override
     public boolean verify(String parameter) {
-        return new ArgumentParser(parameter).getArguments().length == getArgumentsAccepted() && (!isRegexEnabled() || parameter.matches(getRegex()));
+        return new ArgumentParser(parameter).getArguments().length == argumentsAccepted && (!isRegexEnabled() || parameter.matches(regex));
     }
 
     @Override
@@ -89,7 +89,7 @@ public class Variable extends Parameter {
     }
 
     public boolean isRegexEnabled() {
-        return !getRegex().isEmpty();
+        return !regex.isEmpty();
     }
 
     public String getRegex() {
@@ -97,11 +97,11 @@ public class Variable extends Parameter {
     }
 
     public String getOpeningTag() {
-        return isOptional() ? "[" : "<";
+        return optional ? "[" : "<";
     }
 
     public String getClosingTag() {
-        return isOptional() ? "]" : ">";
+        return optional ? "]" : ">";
     }
 
     @Override

@@ -53,9 +53,9 @@ public abstract class Converter<T> {
     }
 
     public T safelyConvert(ContextualVariable variable) throws ConversionException {
-        if (getMinAcceptedArguments() > 0 && getMaxAcceptedArguments() > 0) {
-            if (variable.getConsumedArguments().length < getMinAcceptedArguments() || variable.getConsumedArguments().length > getMaxAcceptedArguments()) {
-                String range = getMinAcceptedArguments() == getMaxAcceptedArguments() ? getMinAcceptedArguments() + " parameters long" : "between " + getMinAcceptedArguments() + " and " + getMaxAcceptedArguments();
+        if (minAcceptedArguments > 0 && maxAcceptedArguments > 0) {
+            if (variable.getConsumedArguments().length < minAcceptedArguments || variable.getConsumedArguments().length > maxAcceptedArguments) {
+                String range = minAcceptedArguments == maxAcceptedArguments ? minAcceptedArguments + " parameters long" : "between " + minAcceptedArguments + " and " + maxAcceptedArguments;
                 throw new ConversionException(variable.getContext().getManager().getMessage(MessagePurpose.INVALID_ARGUMENT_NUMBER, "<args>", variable.getConsumedArguments().length, "<range>", range));
             }
         }

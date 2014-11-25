@@ -56,7 +56,7 @@ public class Syntax implements Iterable<Parameter> {
     protected void buildSyntax(String stringSyntax) throws IllegalSyntaxException {
         Affirm.notNull(stringSyntax, "Syntax must not be null.");
         this.stringSyntax = stringSyntax;
-        this.syntax = new SyntaxBuilder(getStringSyntax(), getCommandBinding()).getParameters();
+        this.syntax = new SyntaxBuilder(this.stringSyntax, commandBinding).getParameters();
         parameterNameMap.clear();
         variableNameMap.clear();
         for (Parameter parameter : getSyntax()) {
@@ -74,7 +74,7 @@ public class Syntax implements Iterable<Parameter> {
     }
 
     public String getCommandName() {
-        return getStringSyntax().split("\\s+")[0];
+        return stringSyntax.split("\\s+")[0];
     }
 
     public String getStringSyntax() {
@@ -88,7 +88,7 @@ public class Syntax implements Iterable<Parameter> {
 
         String syntax = "";
         for (Parameter parameter : getSyntax()) {
-            ParameterBinding parameterBinding = getCommandBinding().getBinding(parameter);
+            ParameterBinding parameterBinding = commandBinding.getBinding(parameter);
             if (parameterBinding != null && !parameterBinding.getAlternateName().isEmpty()) {
                 syntax += parameterBinding.getAlternateName() + " ";
                 continue;

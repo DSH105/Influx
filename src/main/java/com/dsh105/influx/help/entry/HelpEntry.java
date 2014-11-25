@@ -71,7 +71,7 @@ public class HelpEntry implements Comparable<HelpEntry> {
     }
 
     protected String format(String message) {
-        return getHelpProvider().getManager().getResponder().format(message);
+        return helpProvider.getManager().getResponder().format(message);
     }
 
     @Override

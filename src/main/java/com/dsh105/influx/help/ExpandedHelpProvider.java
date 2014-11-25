@@ -57,8 +57,8 @@ public class ExpandedHelpProvider<S> extends HelpProvider<ExpandedHelpEntry, S> 
 
     @Override
     public <T extends S> void sendPage(T sender, int page) {
-        ObjectPaginator<ExpandedHelpEntry> paginator = new ObjectPaginator<>(getPaginator().getPerPage());
-        for (ExpandedHelpEntry entry : getPaginator().getRaw()) {
+        ObjectPaginator<ExpandedHelpEntry> paginator = new ObjectPaginator<>(this.paginator.getPerPage());
+        for (ExpandedHelpEntry entry : this.paginator.getRaw()) {
             if (getManager().authorize(sender, entry.getController(), entry.getPermissions())) {
                 paginator.add(entry);
             }

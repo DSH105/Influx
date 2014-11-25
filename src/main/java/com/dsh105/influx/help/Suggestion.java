@@ -37,7 +37,7 @@ public class Suggestion {
         this.input = input;
         this.suggestions = new ArrayList<>();
 
-        for (Controller controller : getManager().getMappedCommands()) {
+        for (Controller controller : this.manager.getMappedCommands()) {
             if (this.suggestions.size() > maximumAllowed) {
                 break;
             }
@@ -54,7 +54,7 @@ public class Suggestion {
 
                 String suggestion = StringUtil.combineArray(0, maxIndex, " ", parts);
                 String suggestion2 = StringUtil.combineArray(0, maxIndex2, " ", parts);
-                if (getInput().startsWith(suggestion) || getInput().startsWith(suggestion2)) {
+                if (this.input.startsWith(suggestion) || this.input.startsWith(suggestion2)) {
                     this.suggestions.add(command.getAcceptedStringSyntax());
                 }
             }

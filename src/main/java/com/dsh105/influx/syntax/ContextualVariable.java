@@ -44,6 +44,6 @@ public class ContextualVariable extends Variable {
     }
 
     public String getConsumedValue() {
-        return StringUtil.combineArray(" ", getConsumedArguments());
+        return StringUtil.combineArray(" ", value);
     }
 }

@@ -64,7 +64,7 @@ public class CommandContext<S> {
     }
 
     public Command getCommand() {
-        return getController().getCommand();
+        return controller.getCommand();
     }
 
     public String getInput() {
@@ -76,7 +76,7 @@ public class CommandContext<S> {
     }
 
     public String[] args() {
-        return getArguments();
+        return arguments;
     }
 
     public int argsLength() {
@@ -88,7 +88,7 @@ public class CommandContext<S> {
     }
 
     public void respond(String response, ResponseLevel level) {
-        getManager().respond(sender(), response, level);
+        manager.respond(sender(), response, level);
     }
 
     public void respondAnonymously(String response) {
@@ -96,7 +96,7 @@ public class CommandContext<S> {
     }
 
     public void respondAnonymously(String response, ResponseLevel level) {
-        getManager().respondAnonymously(sender(), response, level);
+        manager.respondAnonymously(sender(), response, level);
     }
 
     private <V> void initialiseContextualType(Class<V> type) {
@@ -200,10 +200,10 @@ public class CommandContext<S> {
     }
 
     public String arg(int index) {
-        if (index >= getArguments().length) {
+        if (index >= arguments.length) {
             throw new ArrayIndexOutOfBoundsException("Argument " + index + " does not exist.");
         }
-        return getArguments()[index];
+        return arguments[index];
     }
 
     public String arg(int index, int startIndex, int endIndex) {
@@ -212,7 +212,7 @@ public class CommandContext<S> {
 
     public String arg(int index, Range argumentRange) {
         String[] arguments = args(argumentRange);
-        if (index >= getArguments().length) {
+        if (index >= this.arguments.length) {
             throw new ArrayIndexOutOfBoundsException("Argument " + index + " does not exist in range " + argumentRange.getStartIndex() + "-" + argumentRange.getEndIndex() + ".");
         }
         return arguments[index];
@@ -230,7 +230,7 @@ public class CommandContext<S> {
         int endIndex = argumentRange.getEndIndex() + 1;
         String[] result = argumentSets.get(argumentRange);
         if (result == null || result.length == 0) {
-            result = Arrays.copyOfRange(getArguments(), argumentRange.getStartIndex(), endIndex >= argsLength() ? argsLength() : endIndex);
+            result = Arrays.copyOfRange(arguments, argumentRange.getStartIndex(), endIndex >= argsLength() ? argsLength() : endIndex);
             argumentSets.put(argumentRange, result);
         }
         return result;

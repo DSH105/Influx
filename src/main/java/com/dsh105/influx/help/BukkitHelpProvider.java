@@ -81,8 +81,8 @@ public class BukkitHelpProvider<S extends CommandSender> extends HelpProvider<Bu
 
     @Override
     public <T extends S> void sendPage(T sender, int page) {
-        Paginator<BukkitHelpEntry> paginator = new Paginator<>(getPaginator().getPerPage());
-        for (BukkitHelpEntry entry : getPaginator().getRaw()) {
+        Paginator<BukkitHelpEntry> paginator = new Paginator<>(this.paginator.getPerPage());
+        for (BukkitHelpEntry entry : this.paginator.getRaw()) {
             if (getManager().authorize(sender, entry.getController(), entry.getPermissions())) {
                 paginator.add(entry);
             }

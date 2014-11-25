@@ -76,7 +76,7 @@ public class Dispatcher<S> {
     public SortedSet<Controller> findFuzzyMatches(String input) {
         FuzzyArgumentMatcher fuzzyArgumentMatcher = fuzzyMatchers.get(input);
         if (fuzzyArgumentMatcher == null) {
-            fuzzyArgumentMatcher = new FuzzyArgumentMatcher(getManager(), input);
+            fuzzyArgumentMatcher = new FuzzyArgumentMatcher(manager, input);
             fuzzyMatchers.put(input, fuzzyArgumentMatcher);
         }
         return Collections.unmodifiableSortedSet(fuzzyArgumentMatcher.getHighestPossibleMatches());
@@ -92,30 +92,30 @@ public class Dispatcher<S> {
         }
 
         // command not found - do something else with it
-        getManager().respond(sender, getManager().getMessage(MessagePurpose.COMMAND_NOT_FOUND, "<command>", getManager().getCommandPrefix() + input), ResponseLevel.SEVERE);
+        manager.respond(sender, manager.getMessage(MessagePurpose.COMMAND_NOT_FOUND, "<command>", manager.getCommandPrefix() + input), ResponseLevel.SEVERE);
 
-        Suggestion suggestion = new Suggestion(getManager(), input, 3);
+        Suggestion suggestion = new Suggestion(manager, input, 3);
         if (!suggestion.getSuggestions().isEmpty()) {
             String suggestions = StringUtil.combine("{c1}, {c2}", suggestion.getSuggestions());
-            getManager().respond(sender, getManager().getMessage(MessagePurpose.SUGGESTIONS, "<suggestions>", suggestions), ResponseLevel.SEVERE);
+            manager.respond(sender, manager.getMessage(MessagePurpose.SUGGESTIONS, "<suggestions>", suggestions), ResponseLevel.SEVERE);
         }
         return true;
     }
 
     public <T extends S> boolean preDispatch(T sender, Controller controller, String input) {
-        return dispatch(new CommandContext<>(getManager(), controller, sender, consumedArgumentSets.get(input).get(controller)));
+        return dispatch(new CommandContext<>(manager, controller, sender, consumedArgumentSets.get(input).get(controller)));
     }
 
     public boolean dispatch(CommandContext<S> context) {
         try {
             if (!context.getCommand().acceptsSender(context.sender().getClass())) {
-                context.respond(getManager().getMessage(MessagePurpose.RESTRICTED_SENDER), ResponseLevel.SEVERE);
+                context.respond(manager.getMessage(MessagePurpose.RESTRICTED_SENDER), ResponseLevel.SEVERE);
                 return true;
             }
 
             List<String> permissions = preparePermissions(context);
-            if (permissions.size() > 0 && !getManager().authorize(context.sender(), context.getController(), permissions)) {
-                String response = getManager().getMessage(context.getCommand().getVariables().size() > 0 ? MessagePurpose.RESTRICTED_PERMISSION_WITH_VAR_RECOMMENDATION : MessagePurpose.RESTRICTED_PERMISSION);
+            if (permissions.size() > 0 && !manager.authorize(context.sender(), context.getController(), permissions)) {
+                String response = manager.getMessage(context.getCommand().getVariables().size() > 0 ? MessagePurpose.RESTRICTED_PERMISSION_WITH_VAR_RECOMMENDATION : MessagePurpose.RESTRICTED_PERMISSION);
                 context.respond(response, ResponseLevel.SEVERE);
                 return true;
             }
@@ -125,7 +125,7 @@ public class Dispatcher<S> {
 
             if (!result) {
                 for (String part : context.getController().getDescription().getUsage()) {
-                    context.respond(part.replace("<command>", getManager().getCommandPrefix() + context.getCommand().getAcceptedStringSyntax()));
+                    context.respond(part.replace("<command>", manager.getCommandPrefix() + context.getCommand().getAcceptedStringSyntax()));
                 }
             }
         } catch (ConversionException | ResponseUnsupportedException e) {

@@ -43,7 +43,7 @@ public class BukkitResponder extends Responder<CommandSender> {
     }
 
     public ChatColor getResponseColor(int index) {
-        return getResponseColor(index, getNormalScheme());
+        return getResponseColor(index, normalScheme);
     }
 
     public ChatColor getResponseColor(int index, ChatColor... scheme) {
@@ -77,11 +77,11 @@ public class BukkitResponder extends Responder<CommandSender> {
     public ChatColor[] getScheme(ResponseLevel level) {
         switch (level) {
             case WARNING:
-                return getWarningScheme();
+                return warningScheme;
             case SEVERE:
-                return getSevereScheme();
+                return severeScheme;
             default:
-                return getNormalScheme();
+                return normalScheme;
         }
     }
 
