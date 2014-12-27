@@ -72,7 +72,7 @@ public class ExampleNest implements CommandListener {
     // Again, this one interacts with the manager
     public boolean helpCommand(CommandContext<MockSender> context) {
         String command = context.var("command");
-        SortedMap<Controller, String[]> matches = context.getManager().getHelp().getHelpFor(command);
+        SortedMap<Controller, String[]> matches = context.getManager().getHelp().getStringHelpFor(command);
         if (matches.isEmpty()) {
             context.respond("No help found for \"" + command + "\".");
             return true;

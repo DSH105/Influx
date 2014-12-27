@@ -52,16 +52,32 @@ public class BukkitCommandManager extends CommandManager<CommandSender> implemen
     }
 
     @Override
-    public void setHelpTitle(String helpTitle) {
-        super.setHelpTitle(helpTitle);
-        if (this.getHelp() instanceof BukkitHelpProvider) {
-            ((BukkitHelpProvider) getHelp()).buildHeader();
+    public BukkitHelpProvider<CommandSender> getHelp() {
+        try {
+            return (BukkitHelpProvider<CommandSender>) super.getHelp();
+        } catch (ClassCastException e) {
+            throw new IllegalStateException("Help provider must be a BukkitHelpProvider");
+        }
+    }
+
+    @Override
+    public BukkitResponder getResponder() {
+        try {
+            return (BukkitResponder) super.getResponder();
+        } catch (ClassCastException e) {
+            throw new IllegalStateException("Responder must be a BukkitResponder");
         }
     }
 
     @Override
     public BukkitDispatcher getDispatcher() {
         return (BukkitDispatcher) super.getDispatcher();
+    }
+
+    @Override
+    public void setHelpTitle(String helpTitle) {
+        super.setHelpTitle(helpTitle);
+        getHelp().buildHeader();
     }
 
     @Override

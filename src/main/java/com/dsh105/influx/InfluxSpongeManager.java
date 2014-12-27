@@ -17,19 +17,23 @@
 
 package com.dsh105.influx;
 
-import com.dsh105.influx.dispatch.BukkitDispatcher;
-import com.dsh105.influx.help.BukkitHelpProvider;
-import com.dsh105.influx.help.HelpProvider;
-import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
+import com.dsh105.influx.dispatch.SpongeDispatcher;
+import com.dsh105.influx.help.SpongeHelpProvider;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.command.CommandSource;
 
-public interface InfluxBukkitManager extends InfluxManager<CommandSender> {
-
-    @Override
-    BukkitDispatcher getDispatcher();
+public interface InfluxSpongeManager extends InfluxManager<CommandSource> {
 
     @Override
-    BukkitHelpProvider<CommandSender> getHelp();
+    SpongeHelpProvider<CommandSource> getHelp();
 
-    Plugin getPlugin();
+    @Override
+    SpongeDispatcher getDispatcher();
+
+    Game getGame();
+
+    Object getPlugin();
+
+    PluginContainer getPluginContainer();
 }

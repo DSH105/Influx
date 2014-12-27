@@ -19,13 +19,16 @@ package com.dsh105.influx.help;
 
 import com.dsh105.influx.InfluxBukkitManager;
 import com.dsh105.influx.InfluxManager;
+import com.dsh105.influx.InfluxSpongeManager;
 
 public enum HelpProvision {
 
     CONDENSED,
     EXPANDED,
     BUKKIT_CONDENSED,
-    BUKKIT;
+    BUKKIT,
+    SPONGE_CONDENSED,
+    SPONGE;
 
     public HelpProvider newProvider(InfluxManager<?> manager) {
         switch (this) {
@@ -37,6 +40,12 @@ public enum HelpProvision {
                     return new BukkitHelpProvider<>((InfluxBukkitManager) manager, this);
                 }
                 throw new IllegalStateException("Bukkit help provision can only be enabled for an InfluxBukkitManager");
+            case SPONGE:
+            case SPONGE_CONDENSED:
+                if (manager instanceof InfluxSpongeManager) {
+                    return new SpongeHelpProvider<>((InfluxSpongeManager) manager, this);
+                }
+                throw new IllegalStateException("Sponge help provision can only be enabled for an InfluxSpongeManager");
             default:
                 return new DefaultHelpProvider<>(manager, this);
         }

@@ -18,15 +18,17 @@
 package com.dsh105.influx.help;
 
 import com.dsh105.commodus.StringUtil;
+import com.dsh105.commodus.reflection.Reflection;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.help.entry.HelpEntry;
 import com.dsh105.influx.util.Affirm;
 import com.dsh105.influx.util.Comparators;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
-public abstract class HelpProvider<H extends HelpEntry, S> {
+public abstract class HelpProvider<E extends HelpEntry, S, H> {
 
     public static String DEFAULT = "default";
 
@@ -34,8 +36,10 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
     private HelpProvision provision;
     private String header;
 
-    private HashMap<String, SortedSet<H>> groupToEntriesMap = new HashMap<>();
+    private HashMap<String, SortedSet<E>> groupToEntriesMap = new HashMap<>();
     private String defaultEntryListing;
+
+    private Class<H> helpType = (Class<H>) Reflection.getTypeArguments(HelpProvider.class, getClass()).get(2);
 
     private boolean restrictByPermission = false;
 
@@ -72,33 +76,33 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
         this.restrictByPermission = restrictByPermission;
     }
 
-    public SortedSet<H> getEntries(String group) {
-        SortedSet<H> entries = groupToEntriesMap.get(group);
+    public SortedSet<E> getEntries(String group) {
+        SortedSet<E> entries = groupToEntriesMap.get(group);
         if (entries == null) {
             entries = new TreeSet<>();
         }
         return Collections.unmodifiableSortedSet(entries);
     }
 
-    public SortedSet<H> getEntries() {
-        SortedSet<H> entries = new TreeSet<>();
-        for (SortedSet<H> group : groupToEntriesMap.values()) {
+    public SortedSet<E> getEntries() {
+        SortedSet<E> entries = new TreeSet<>();
+        for (SortedSet<E> group : groupToEntriesMap.values()) {
             entries.addAll(group);
         }
         return Collections.unmodifiableSortedSet(entries);
     }
 
-    public abstract H buildHelpEntry(Controller controller);
+    public abstract E buildHelpEntry(Controller controller);
 
     public boolean add(Controller controller) {
         return this.add(buildHelpEntry(controller));
     }
 
-    protected boolean add(H entry) {
+    protected boolean add(E entry) {
         Affirm.notNull(entry, "Help entry must not be null.");
 
         String group = entry.getController().getDescription().getHelpGroup();
-        SortedSet<H> groupEntries = groupToEntriesMap.get(group);
+        SortedSet<E> groupEntries = groupToEntriesMap.get(group);
         if (groupEntries == null) {
             groupEntries = new TreeSet<>();
         }
@@ -113,8 +117,8 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
     }
 
     public boolean remove(Controller controller) {
-        for (Map.Entry<String, SortedSet<H>> entry : groupToEntriesMap.entrySet()) {
-            for (H helpEntry : entry.getValue()) {
+        for (Map.Entry<String, SortedSet<E>> entry : groupToEntriesMap.entrySet()) {
+            for (E helpEntry : entry.getValue()) {
                 if (helpEntry.getController().equals(controller)) {
                     return remove(entry.getKey(), helpEntry);
                 }
@@ -123,13 +127,13 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
         return false;
     }
 
-    protected boolean remove(String group, H entry) {
+    protected boolean remove(String group, E entry) {
         return groupToEntriesMap.get(group).remove(entry);
     }
 
-    public H getHelpEntry(Controller controller) {
-        for (Map.Entry<String, SortedSet<H>> entry : groupToEntriesMap.entrySet()) {
-            for (H helpEntry : entry.getValue()) {
+    public E getHelpEntry(Controller controller) {
+        for (Map.Entry<String, SortedSet<E>> entry : groupToEntriesMap.entrySet()) {
+            for (E helpEntry : entry.getValue()) {
                 if (helpEntry.getController().equals(controller)) {
                     return helpEntry;
                 }
@@ -145,7 +149,7 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
     public <T extends S> String getDefaultEntryListing(T sender) {
         if (this.defaultEntryListing == null || this.defaultEntryListing.isEmpty()) {
             StringBuilder builder = new StringBuilder();
-            for (H entry : getEntries(DEFAULT)) {
+            for (E entry : getEntries(DEFAULT)) {
                 if (sender != null && restrictByPermission() && !manager.authorize(sender, entry.getController(), entry.getPermissions())) {
                     continue;
                 }
@@ -170,18 +174,24 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
         manager.respondAnonymously(sender, "Valid command groups: {c2}" + StringUtil.combine("{c1}, {c2}", groupToEntriesMap.keySet()));
     }
 
-    public <T extends S> void sendHelpFor(T sender, Controller controller) {
-        for (String part : getHelpFor(controller)) {
+    public abstract <T extends S> void sendHelpFor(T sender, Controller controller);/* {
+        for (String part : getStringHelpFor(controller)) {
+            manager.respondAnonymously(sender, part);
+        }
+    }*/
+
+    protected <T extends S> void sendStringHelp(T sender, Controller controller) {
+        for (String part : getStringHelpFor(controller)) {
             manager.respondAnonymously(sender, part);
         }
     }
 
-    public SortedMap<Controller, String[]> getHelpFor(String input) {
+    public SortedMap<Controller, String[]> getStringHelpFor(String input) {
         SortedMap<Controller, String[]> help = new TreeMap<>(new Comparators.ControllerComparator());
         SortedSet<Controller> matches = manager.getDispatcher().findFuzzyMatches(input);
 
         for (Controller controller : matches) {
-            List<String> controllerHelp = getHelpFor(controller);
+            List<String> controllerHelp = getStringHelpFor(controller);
             if (!controllerHelp.isEmpty()) {
                 help.put(controller, controllerHelp.toArray(new String[0]));
             }
@@ -189,10 +199,24 @@ public abstract class HelpProvider<H extends HelpEntry, S> {
         return help;
     }
 
-    public List<String> getHelpFor(Controller controller) {
+    public SortedMap<Controller, H[]> getHelpFor(String input) {
+        SortedMap<Controller, H[]> help = new TreeMap<>(new Comparators.ControllerComparator());
+        SortedSet<Controller> matches = manager.getDispatcher().findFuzzyMatches(input);
+
+        for (Controller controller : matches) {
+            List<H> controllerHelp = getHelpFor(controller);
+            if (!controllerHelp.isEmpty()) {
+                help.put(controller, controllerHelp.toArray((H[]) Array.newInstance(helpType, controllerHelp.size())));
+            }
+        }
+        return help;
+    }
+
+    public abstract List<H> getHelpFor(Controller controller);
+
+    public List<String> getStringHelpFor(Controller controller) {
         List<String> help = new ArrayList<>();
-        String fullCommand = manager.getCommandPrefix() + controller.getCommand().getAcceptedStringSyntax();
-        H helpEntry = getHelpEntry(controller);
+        E helpEntry = getHelpEntry(controller);
         if (helpEntry != null) {
             help.add("Aliases (" + controller.getCommand().getAliases().size() + "): " + StringUtil.combine("{c1}, {c2}", controller.getCommand().getReadableStringAliases()));
             Collections.addAll(help, helpEntry.getLongDescription());

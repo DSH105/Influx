@@ -19,11 +19,13 @@ package com.dsh105.influx.registration;
 
 import com.dsh105.influx.InfluxBukkitManager;
 import com.dsh105.influx.InfluxManager;
+import com.dsh105.influx.InfluxSpongeManager;
 import com.dsh105.influx.registration.bukkit.BukkitRegistry;
+import com.dsh105.influx.registration.sponge.SpongeRegistry;
 
 public enum RegistrationStrategy {
 
-    NONE, BUKKIT;
+    NONE, BUKKIT, SPONGE;
 
     public Registry prepare(InfluxManager<?> manager) {
         Registry registry;
@@ -34,6 +36,12 @@ public enum RegistrationStrategy {
                     break;
                 }
                 throw new IllegalStateException("Bukkit command registration can only be enabled for an InfluxBukkitManager");
+            case SPONGE:
+                if (manager instanceof InfluxSpongeManager) {
+                    registry = new SpongeRegistry((InfluxSpongeManager) manager);
+                    break;
+                }
+                throw new IllegalStateException("Sponge command registration can only be enabled for an InfluxSpongeManager");
             default:
                 registry = new Registry(manager);
                 break;

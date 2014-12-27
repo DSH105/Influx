@@ -18,17 +18,16 @@
 package com.dsh105.influx.help.entry;
 
 import com.dsh105.influx.Controller;
-import com.dsh105.influx.help.BukkitHelpProvider;
 import com.dsh105.influx.help.HelpProvider;
+import com.dsh105.influx.help.SpongeHelpProvider;
 import com.dsh105.influx.response.MessagePurpose;
-import com.dsh105.powermessage.core.PowerMessage;
-import org.bukkit.command.CommandSender;
+import org.spongepowered.api.text.message.Message;
 
-public class BukkitHelpEntry extends HelpEntry {
+public class SpongeHelpEntry extends HelpEntry {
 
-    protected PowerMessage message;
+    protected Message.Text message;
 
-    public BukkitHelpEntry(HelpProvider helpProvider, Controller controller) {
+    public SpongeHelpEntry(HelpProvider helpProvider, Controller controller) {
         super(helpProvider, controller);
         reformat();
     }
@@ -36,18 +35,14 @@ public class BukkitHelpEntry extends HelpEntry {
     @Override
     public void reformat() {
         super.reformat();
-        message = BukkitHelpProvider.prepare(getHelpProvider().getManager(), this, getTemplate(), -1);
-    }
-
-    public PowerMessage getMessage() {
-        return message;
+        message = SpongeHelpProvider.prepare(getHelpProvider().getManager(), this, getTemplate(), -1);
     }
 
     protected String getTemplate() {
-        return getHelpProvider().getManager().getMessage(MessagePurpose.BUKKIT_SHORT_HELP_ENTRY);
+        return getHelpProvider().getManager().getMessage(MessagePurpose.SPONGE_SHORT_HELP_ENTRY);
     }
 
-    public void send(CommandSender sender) {
-        message.send(sender);
+    public Message.Text getMessage() {
+        return message;
     }
 }

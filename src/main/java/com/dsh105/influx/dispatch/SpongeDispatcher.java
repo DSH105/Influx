@@ -15,32 +15,20 @@
  * along with Influx.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.dsh105.influx.help;
+package com.dsh105.influx.dispatch;
 
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
-import com.dsh105.influx.help.entry.HelpEntry;
+import org.spongepowered.api.util.command.CommandSource;
 
-import java.util.List;
+public class SpongeDispatcher extends Dispatcher<CommandSource> {
 
-public class DefaultHelpProvider<S> extends HelpProvider<HelpEntry, S, String> {
-
-    public DefaultHelpProvider(InfluxManager<S> manager, HelpProvision provision) {
-        super(manager, provision);
+    public SpongeDispatcher(InfluxManager<CommandSource> manager) {
+        super(manager);
     }
 
     @Override
-    public HelpEntry buildHelpEntry(Controller controller) {
-        return new HelpEntry(this, controller);
-    }
-
-    @Override
-    public List<String> getHelpFor(Controller controller) {
-        return getStringHelpFor(controller);
-    }
-
-    @Override
-    public <T extends S> void sendHelpFor(T sender, Controller controller) {
-        sendStringHelp(sender, controller);
+    public <T extends CommandSource> boolean preDispatch(T sender, Controller controller, String input) {
+        return dispatch(new SpongeCommandEvent<>(getManager(), controller, sender, consumedArgumentSets.get(input).get(controller)));
     }
 }

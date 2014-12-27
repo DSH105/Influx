@@ -18,16 +18,16 @@
 package com.dsh105.influx.conversion;
 
 import com.dsh105.commodus.StringUtil;
-import com.dsh105.commodus.bukkit.BukkitIdentUtil;
-import com.dsh105.commodus.bukkit.BukkitUtil;
+import com.dsh105.commodus.container.SpongePosition;
+import com.dsh105.commodus.sponge.SpongeUtil;
+import com.dsh105.influx.dispatch.SpongeCommandEvent;
 import com.dsh105.influx.syntax.ContextualVariable;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
+import org.spongepowered.api.entity.player.Player;
 
 // TODO: More of these
-public class BukkitConverters {
+public class SpongeConverters {
 
-    private BukkitConverters() {
+    private SpongeConverters() {
     }
 
     public static class PlayerConverter extends Converter<Player> {
@@ -40,7 +40,7 @@ public class BukkitConverters {
         public Player convert(ContextualVariable variable) throws ConversionException {
             Player player = null;
             if (variable.getConsumedArguments().length == 1) {
-                player = BukkitIdentUtil.getPlayer(variable.getConsumedArguments()[0]);
+                player = ((SpongeCommandEvent) variable.getContext()).getGame().getServer().get().getPlayer(variable.getConsumedArguments()[0]).orNull();
             }
 
             if (player == null) {
@@ -50,20 +50,20 @@ public class BukkitConverters {
         }
     }
 
-    public static class LocationConverter extends Converter<Location> {
+    public static class LocationConverter extends Converter<SpongePosition> {
 
         public LocationConverter() {
-            super(Location.class, 4, 6);
+            super(SpongePosition.class, 4, 6);
         }
 
         @Override
-        public Location convert(ContextualVariable variable) throws ConversionException {
+        public SpongePosition convert(ContextualVariable variable) throws ConversionException {
             try {
-                Location location = BukkitUtil.readLocation(0, variable.getConsumedArguments());
-                if (location == null) {
+                SpongePosition position = SpongeUtil.readLocation(0, variable.getConsumedArguments());
+                if (position == null) {
                     throw new ConversionException("Invalid location coordinates provided: " + StringUtil.combineArray(0, 4, ", ", variable.getConsumedArguments()));
                 }
-                return location;
+                return position;
             } catch (IllegalStateException e) {
                 throw new ConversionException("World does not exist:" + variable.getConsumedArguments()[0]);
             }

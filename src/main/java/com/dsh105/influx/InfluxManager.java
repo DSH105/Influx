@@ -32,9 +32,6 @@ import java.util.Collection;
 public interface InfluxManager<S> extends InfluxMapping {
 
     @Override
-    Class<?> getSenderType();
-
-    @Override
     Registry getRegistry();
 
     String getCommandPrefix();
@@ -43,11 +40,11 @@ public interface InfluxManager<S> extends InfluxMapping {
 
     void setRegistrationStrategy(Registry registry);
 
-    HelpProvider<?, S> getHelp();
+    HelpProvider<?, S, ?> getHelp();
 
     void setHelpProvision(HelpProvision provision);
 
-    void setHelpProvision(HelpProvider<?, S> provider);
+    void setHelpProvision(HelpProvider<?, S, ?> provider);
 
     Responder<S> getResponder();
 

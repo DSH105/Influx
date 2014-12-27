@@ -26,8 +26,6 @@ public interface InfluxMapping extends Iterable<Controller> {
 
     Registry getRegistry();
 
-    Class<?> getSenderType();
-
     Set<Controller> getMappedCommands();
 
     Set<Controller> getMappedCommands(CommandListener listener);

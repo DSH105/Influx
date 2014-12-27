@@ -17,19 +17,21 @@
 
 package com.dsh105.influx.help;
 
-import com.dsh105.commodus.paginator.ObjectPaginator;
+import com.dsh105.commodus.Paginator;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.help.entry.ExpandedHelpEntry;
 import com.dsh105.influx.response.MessagePurpose;
 
-public class ExpandedHelpProvider<S> extends HelpProvider<ExpandedHelpEntry, S> {
+import java.util.List;
 
-    private ObjectPaginator<ExpandedHelpEntry> paginator;
+public class ExpandedHelpProvider<S> extends HelpProvider<ExpandedHelpEntry, S, String> {
+
+    private Paginator<ExpandedHelpEntry> paginator;
 
     public ExpandedHelpProvider(InfluxManager<S> manager, HelpProvision provision) {
         super(manager, provision);
-        this.paginator = new ObjectPaginator<>(6);
+        this.paginator = new Paginator<>(6);
     }
 
     @Override
@@ -40,7 +42,7 @@ public class ExpandedHelpProvider<S> extends HelpProvider<ExpandedHelpEntry, S> 
     @Override
     protected boolean add(ExpandedHelpEntry entry) {
         if (super.add(entry)) {
-            paginator.add(entry);
+            paginator.append(entry);
             return true;
         }
         return false;
@@ -57,22 +59,32 @@ public class ExpandedHelpProvider<S> extends HelpProvider<ExpandedHelpEntry, S> 
 
     @Override
     public <T extends S> void sendPage(T sender, int page) {
-        ObjectPaginator<ExpandedHelpEntry> paginator = new ObjectPaginator<>(this.paginator.getPerPage());
-        for (ExpandedHelpEntry entry : this.paginator.getRaw()) {
+        Paginator<ExpandedHelpEntry> paginator = new Paginator<>(this.paginator.getPerPage());
+        for (ExpandedHelpEntry entry : this.paginator.getContent()) {
             if (getManager().authorize(sender, entry.getController(), entry.getPermissions())) {
-                paginator.add(entry);
+                paginator.append(entry);
             }
         }
         if (!paginator.exists(page)) {
             getManager().respond(sender, getManager().getMessage(MessagePurpose.PAGE_NOT_FOUND, "<page>", page));
             return;
         }
-        for (String entry : paginator.getPage(page)) {
+        for (String entry : paginator.getConvertedPage(page)) {
             getManager().respondAnonymously(sender, entry);
         }
     }
 
-    public ObjectPaginator<ExpandedHelpEntry> getPaginator() {
+    @Override
+    public <T extends S> void sendHelpFor(T sender, Controller controller) {
+        sendStringHelp(sender, controller);
+    }
+
+    @Override
+    public List<String> getHelpFor(Controller controller) {
+        return getStringHelpFor(controller);
+    }
+
+    public Paginator<ExpandedHelpEntry> getPaginator() {
         return paginator;
     }
 }

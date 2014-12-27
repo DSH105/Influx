@@ -33,7 +33,13 @@ public enum MessagePurpose {
     BUKKIT_SHORT_HELP_ENTRY("{c2}<command>"),
     BUKKIT_HELP_ENTRY("{c2}<command> {c1}(<alias_num>) - <short_desc>"),
     BUKKIT_ENTRY_HELP_TITLE("{c2}<command> {c1}(<alias_num>):"),
-    BUKKIT_EXPANDED_HELP_DESCRIPTION_PART("&r• <desc>");
+    BUKKIT_EXPANDED_HELP_DESCRIPTION_PART("&r• <desc>"),
+
+    SPONGE_HELP_HEADER("&e---- &6Help: &e--&6 <topic>&e "),
+    SPONGE_SHORT_HELP_ENTRY("{c2}<command>"),
+    SPONGE_HELP_ENTRY("{c2}<command> {c1}(<alias_num>) - <short_desc>"),
+    SPONGE_ENTRY_HELP_TITLE("{c2}<command> {c1}(<alias_num>):"),
+    SPONGE_EXPANDED_HELP_DESCRIPTION_PART("&r• <desc>");
 
     private String defaultValue;
 

@@ -100,9 +100,6 @@ public abstract class CommandMapping implements InfluxMapping {
         } catch (IllegalCommandException e) {
             throw new IllegalArgumentException("Illegal command syntax provided.", e);
         }
-        if (!getSenderType().isAssignableFrom(controller.getCommand().getAcceptedSenderType())) {
-            throw new IllegalArgumentException("Manager can only have commands accepting the following generic type: " + getSenderType().getSimpleName() + " (not " + controller.getCommand().getAcceptedSenderType() + ")");
-        }
 
         if (exists(controller)) {
             return null;

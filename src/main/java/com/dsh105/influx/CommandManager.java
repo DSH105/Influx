@@ -37,17 +37,13 @@ import java.util.Map;
 
 public class CommandManager<S> extends CommandMapping implements InfluxManager<S> {
 
+    protected Dispatcher<S> dispatcher;
     private String helpTitle;
     private String commandPrefix;
-
-    protected Dispatcher<S> dispatcher;
     private Registry registry;
-    private HelpProvider<?, S> help;
+    private HelpProvider<?, S, ?> help;
     private Responder<S> responder;
     private Authorization<S> authorization;
-
-    //protected Class<T> senderType = GeneralUtil.getSenderTypeFor(this); - TODO: fixit
-    protected Class<?> senderType = Object.class;
 
     private Map<MessagePurpose, String> messages = new HashMap<>();
 
@@ -71,13 +67,21 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
     }
 
     @Override
-    public Class<?> getSenderType() {
-        return senderType;
+    public Registry getRegistry() {
+        return registry;
     }
 
     @Override
-    public Registry getRegistry() {
-        return registry;
+    public void updateCommandNesting(Controller controller, String... parents) {
+        if (!exists(controller)) {
+            return;
+        }
+
+        registry.unregister(controller);
+        help.remove(controller);
+        controller.getCommand().nestUnder(parents);
+        registry.register(controller);
+        help.add(controller);
     }
 
     @Override
@@ -92,11 +96,6 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
     }
 
     @Override
-    public HelpProvider<?, S> getHelp() {
-        return help;
-    }
-
-    @Override
     public void setRegistrationStrategy(Registry registry) {
         Affirm.notNull(registry, "Registry must not be null.");
         if (this.registry != null) {
@@ -107,13 +106,18 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
     }
 
     @Override
+    public HelpProvider<?, S, ?> getHelp() {
+        return help;
+    }
+
+    @Override
     public void setHelpProvision(HelpProvision provision) {
         Affirm.notNull(provision, "Help provision strategy must not be null.");
         this.help = provision.newProvider(this);
     }
 
     @Override
-    public void setHelpProvision(HelpProvider<?, S> provider) {
+    public void setHelpProvision(HelpProvider<?, S, ?> provider) {
         Affirm.notNull(provider, "Help provider must not be null.");
         this.help = provider;
     }
@@ -237,18 +241,5 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void updateCommandNesting(Controller controller, String... parents) {
-        if (!exists(controller)) {
-            return;
-        }
-
-        registry.unregister(controller);
-        help.remove(controller);
-        controller.getCommand().nestUnder(parents);
-        registry.register(controller);
-        help.add(controller);
     }
 }
