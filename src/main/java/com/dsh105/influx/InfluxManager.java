@@ -36,8 +36,6 @@ public interface InfluxManager<S> extends InfluxMapping {
 
     String getCommandPrefix();
 
-    void setRegistrationStrategy(RegistrationStrategy strategy);
-
     void setRegistrationStrategy(Registry registry);
 
     HelpProvider<?, S, ?> getHelp();

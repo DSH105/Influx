@@ -20,11 +20,14 @@ package com.dsh105.influx.registration.bukkit;
 import com.dsh105.commodus.reflection.Reflection;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxBukkitManager;
+import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.registration.Registry;
 import com.dsh105.influx.util.Affirm;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 
@@ -37,9 +40,14 @@ public class BukkitRegistry extends Registry {
     private static Field SERVER_COMMAND_MAP;
 
     private CommandMap commandMap;
+    
+    private Plugin plugin;
+    private CommandExecutor executor;
 
-    public BukkitRegistry(InfluxBukkitManager manager) {
+    public BukkitRegistry(InfluxManager<?> manager, Plugin plugin, CommandExecutor executor) {
         super(manager);
+        this.plugin = plugin;
+        this.executor = executor;
     }
 
     public CommandMap getCommandMap() {
@@ -50,10 +58,10 @@ public class BukkitRegistry extends Registry {
                 }
                 commandMap = (CommandMap) SERVER_COMMAND_MAP.get(Bukkit.getPluginManager());
             } catch (Exception e) {
-                getManager().getPlugin().getLogger().warning("Failed to retrieve CommandMap! Using fallback instead...");
+                plugin.getLogger().warning("Failed to retrieve CommandMap! Using fallback instead...");
 
                 commandMap = new SimpleCommandMap(Bukkit.getServer());
-                Bukkit.getPluginManager().registerEvents(new BukkitFallbackCommandListener(commandMap), getManager().getPlugin());
+                Bukkit.getPluginManager().registerEvents(new BukkitFallbackCommandListener(commandMap), plugin);
             }
         }
 
@@ -61,17 +69,12 @@ public class BukkitRegistry extends Registry {
     }
 
     @Override
-    public InfluxBukkitManager getManager() {
-        return (InfluxBukkitManager) super.getManager();
-    }
-
-    @Override
     public boolean register(Controller controller) {
-        return super.register(controller) && register(new InfluxBukkitCommand(getManager(), controller));
+        return super.register(controller) && register(new InfluxBukkitCommand(getManager(), plugin, executor, controller));
     }
 
     public boolean register(InfluxBukkitCommand command) {
-        if (!getCommandMap().register(getManager().getPlugin().getName(), command)) {
+        if (!getCommandMap().register(plugin.getName(), command)) {
             unregister(command);
             return false;
         }

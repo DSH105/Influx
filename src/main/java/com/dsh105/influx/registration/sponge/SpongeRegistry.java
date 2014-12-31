@@ -20,10 +20,14 @@ package com.dsh105.influx.registration.sponge;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.InfluxSpongeManager;
+import com.dsh105.influx.dispatch.Authorization;
+import com.dsh105.influx.dispatch.SpongeCommandDispatcher;
 import com.dsh105.influx.registration.Registry;
 import com.google.common.base.Optional;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.service.command.CommandService;
 import org.spongepowered.api.util.command.CommandMapping;
+import org.spongepowered.api.util.command.CommandSource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,19 +38,23 @@ public class SpongeRegistry extends Registry {
 
     private final Map<String, CommandMapping> mappings = new HashMap<>();
 
-    public SpongeRegistry(InfluxManager<?> manager) {
-        super(manager);
-        this.commandService = getManager().getGame().getCommandDispatcher();
-    }
+    private Object plugin;
+    private Game game;
+    private SpongeCommandDispatcher dispatcher;
+    private Authorization<CommandSource> authorization;
 
-    @Override
-    public InfluxSpongeManager getManager() {
-        return (InfluxSpongeManager) super.getManager();
+    public SpongeRegistry(InfluxManager<?> manager, Object plugin, Game game, SpongeCommandDispatcher dispatcher, Authorization<CommandSource> authorization) {
+        super(manager);
+        this.commandService = game.getCommandDispatcher();
+        this.plugin = plugin;
+        this.game = game;
+        this.dispatcher = dispatcher;
+        this.authorization = authorization;
     }
 
     @Override
     public boolean register(Controller controller) {
-        Optional<CommandMapping> result = commandService.register(getManager().getPlugin(), new InfluxSpongeCallable(getManager(), controller));
+        Optional<CommandMapping> result = commandService.register(plugin, new InfluxSpongeCallable(getManager(), plugin, game, dispatcher, authorization, controller));
         if (result.isPresent() && !result.get().getAllAliases().isEmpty()) {
             mappings.put(controller.getCommand().getCommandName(), result.get());
             return true;

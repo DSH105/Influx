@@ -20,42 +20,52 @@ package com.dsh105.influx.registration.bukkit;
 import com.dsh105.influx.Controller;
 import com.dsh105.influx.Description;
 import com.dsh105.influx.InfluxBukkitManager;
+import com.dsh105.influx.InfluxManager;
+import com.dsh105.influx.dispatch.BukkitCommandEvent;
 import com.dsh105.influx.dispatch.BukkitDispatcher;
+import com.dsh105.influx.dispatch.Dispatcher;
 import com.dsh105.influx.syntax.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class InfluxBukkitCommand extends org.bukkit.command.Command implements PluginIdentifiableCommand {
 
-    private final InfluxBukkitManager manager;
+    private final InfluxManager<?> manager;
+    private Plugin plugin;
+    private CommandExecutor executor;
 
-    public InfluxBukkitCommand(InfluxBukkitManager manager, Controller controller) {
-        this(manager, controller.getCommand(), controller.getDescription());
+    public InfluxBukkitCommand(InfluxManager<?> manager, Plugin plugin, CommandExecutor executor, Controller controller) {
+        this(manager, plugin, executor,controller.getCommand(), controller.getDescription());
     }
 
-    public InfluxBukkitCommand(InfluxBukkitManager manager, Command command, Description description) {
+    public InfluxBukkitCommand(InfluxManager<?> manager, Plugin plugin, CommandExecutor executor, Command command, Description description) {
         super(command.getCommandName(), description.getShortDescription(), description.getUsage()[0], new ArrayList<>(command.getAliasNames()));
         this.manager = manager;
+        this.plugin = plugin;
+        this.executor = executor;
     }
 
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
-        return getPlugin().isEnabled() && getExecutor().onCommand(sender, this, commandLabel, args);
+        return plugin.isEnabled() && executor.onCommand(sender, this, commandLabel, args);
     }
 
-    public InfluxBukkitManager getManager() {
+    public InfluxManager<?> getManager() {
         return manager;
     }
 
-    public BukkitDispatcher getExecutor() {
-        return manager.getDispatcher();
+    public CommandExecutor getExecutor() {
+        return executor;
     }
 
     @Override
     public Plugin getPlugin() {
-        return manager.getPlugin();
+        return plugin;
     }
 }

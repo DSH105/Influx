@@ -17,23 +17,9 @@
 
 package com.dsh105.influx.dispatch;
 
-import com.dsh105.influx.Controller;
-import com.dsh105.influx.InfluxManager;
 import org.spongepowered.api.util.command.CommandSource;
 
-public class SpongeDispatcher extends Dispatcher<CommandSource> implements SpongeCommandDispatcher {
+public interface SpongeCommandDispatcher {
 
-    public SpongeDispatcher(InfluxManager<CommandSource> manager) {
-        super(manager);
-    }
-
-    @Override
-    public boolean dispatch(CommandSource source, String arguments) {
-        return dispatch(source, arguments.split("\\s+"));
-    }
-
-    @Override
-    public <T extends CommandSource> boolean preDispatch(T sender, Controller controller, String input) {
-        return dispatch(new SpongeCommandEvent<>(getManager(), controller, sender, consumedArgumentSets.get(input).get(controller)));
-    }
+    boolean dispatch(CommandSource source, String arguments);
 }

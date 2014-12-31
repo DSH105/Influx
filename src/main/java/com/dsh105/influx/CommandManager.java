@@ -47,11 +47,10 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     private Map<MessagePurpose, String> messages = new HashMap<>();
 
-    public CommandManager(RegistrationStrategy registrationStrategy, String commandPrefix) {
+    public CommandManager(String commandPrefix) {
         this.commandPrefix = commandPrefix;
         this.dispatcher = new Dispatcher<>(this);
         this.responder = new DefaultResponder<>("");
-        this.setRegistrationStrategy(registrationStrategy);
         this.setHelpProvision(HelpProvision.CONDENSED);
         this.setAuthorization(new Authorization<S>() {
             @Override
@@ -60,9 +59,16 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
             }
         });
     }
+    
+    public CommandManager(Registry registry, String commandPrefix) {
+        this(commandPrefix);
+        if (registry != null) {
+            this.setRegistrationStrategy(registry);
+        }
+    }
 
-    public CommandManager(RegistrationStrategy registrationStrategy, String commandPrefix, String helpTitle) {
-        this(registrationStrategy, commandPrefix);
+    public CommandManager(Registry registry, String commandPrefix, String helpTitle) {
+        this(registry, commandPrefix);
         this.helpTitle = helpTitle;
     }
 
@@ -87,12 +93,6 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
     @Override
     public String getCommandPrefix() {
         return commandPrefix;
-    }
-
-    @Override
-    public void setRegistrationStrategy(RegistrationStrategy strategy) {
-        Affirm.notNull(strategy, "Registration strategy must not be null.");
-        this.setRegistrationStrategy(strategy.prepare(this));
     }
 
     @Override

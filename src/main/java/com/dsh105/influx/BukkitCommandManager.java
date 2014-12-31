@@ -22,6 +22,7 @@ import com.dsh105.influx.dispatch.BukkitDispatcher;
 import com.dsh105.influx.help.BukkitHelpProvider;
 import com.dsh105.influx.help.HelpProvision;
 import com.dsh105.influx.registration.RegistrationStrategy;
+import com.dsh105.influx.registration.bukkit.BukkitRegistry;
 import com.dsh105.influx.response.BukkitResponder;
 import com.dsh105.influx.response.MessagePurpose;
 import org.bukkit.command.CommandSender;
@@ -32,13 +33,17 @@ public class BukkitCommandManager extends CommandManager<CommandSender> implemen
     private Plugin plugin;
 
     public BukkitCommandManager(Plugin plugin) {
-        this(RegistrationStrategy.BUKKIT, plugin);
+        this(null, plugin);
+        this.setRegistrationStrategy(new BukkitRegistry(this, plugin, getDispatcher()));
     }
 
-    public BukkitCommandManager(RegistrationStrategy registrationStrategy, Plugin plugin) {
-        super(registrationStrategy, "/");
+    public BukkitCommandManager(BukkitRegistry registry, Plugin plugin) {
+        super("/");
         this.plugin = plugin;
         this.dispatcher = new BukkitDispatcher(this);
+        if (registry != null) {
+            this.setRegistrationStrategy(registry);
+        }
         this.setHelpTitle(plugin.getName());
         this.setResponseHandler(new BukkitResponder(""));
         this.setHelpProvision(HelpProvision.BUKKIT);

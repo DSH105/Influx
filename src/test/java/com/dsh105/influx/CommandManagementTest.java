@@ -52,7 +52,7 @@ public class CommandManagementTest {
             mockChildSender = new MockChildSender("InfluxTestChild");
             mockResponder = new MockResponder("[Influx]");
 
-            manager = new CommandManager<>(RegistrationStrategy.NONE, "!", "Influx");
+            manager = new CommandManager<>(null, "!", "Influx");
             manager.setResponseHandler(mockResponder);
             manager.setHelpProvision(HelpProvision.EXPANDED);
             ((ExpandedHelpProvider) manager.getHelp()).getPaginator().setPerPage(6);
@@ -66,7 +66,7 @@ public class CommandManagementTest {
         if (bukkitManager == null) {
             mockPlugin = mock(Plugin.class);
             when(mockPlugin.getName()).thenReturn("InfluxPlugin");
-            bukkitManager = new BukkitCommandManager(RegistrationStrategy.NONE, mockPlugin);
+            bukkitManager = new BukkitCommandManager(mockPlugin);
             bukkitManager.setAuthorization(new BukkitAuthorization());
             bukkitManager.register(new BukkitNest());
 

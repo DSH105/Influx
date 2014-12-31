@@ -71,6 +71,10 @@ public class CommandContext<S> {
         return input;
     }
 
+    public ConsumedArgumentSet getConsumedArgumentSet() {
+        return consumedArgumentSet;
+    }
+
     public String[] getArguments() {
         return arguments;
     }

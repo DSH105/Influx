@@ -23,8 +23,8 @@ import com.dsh105.influx.dispatch.SpongeDispatcher;
 import com.dsh105.influx.help.HelpProvision;
 import com.dsh105.influx.help.SpongeHelpProvider;
 import com.dsh105.influx.registration.RegistrationStrategy;
+import com.dsh105.influx.registration.sponge.SpongeRegistry;
 import com.dsh105.influx.response.MessagePurpose;
-import com.dsh105.influx.response.Responder;
 import com.dsh105.influx.response.SpongeResponder;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.entity.player.Player;
@@ -38,11 +38,12 @@ public class SpongeCommandManager extends CommandManager<CommandSource> implemen
     private PluginContainer pluginContainer;
 
     public SpongeCommandManager(Object plugin, Game game) {
-        this(RegistrationStrategy.SPONGE, plugin, game);
+        this(null, plugin, game);
+        this.setRegistrationStrategy(new SpongeRegistry(this, plugin, game, (SpongeDispatcher) dispatcher, getAuthorization()));
     }
-
-    public SpongeCommandManager(RegistrationStrategy registrationStrategy, Object plugin, Game game) {
-        super(registrationStrategy, "/");
+    
+    public SpongeCommandManager(SpongeRegistry registry, Object plugin, Game game) {
+        super("/");
         Affirm.notNull(game);
         this.pluginContainer = game.getPluginManager().fromInstance(plugin).orNull();
         if (this.pluginContainer == null) {
@@ -63,6 +64,9 @@ public class SpongeCommandManager extends CommandManager<CommandSource> implemen
                 return true;
             }
         });
+        if (registry != null) {
+            this.setRegistrationStrategy(registry);
+        }
         this.setMessage(MessagePurpose.RESTRICTED_SENDER, "Please log in to perform that command.");
     }
 

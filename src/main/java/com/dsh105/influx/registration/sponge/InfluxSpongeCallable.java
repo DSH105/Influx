@@ -18,8 +18,13 @@
 package com.dsh105.influx.registration.sponge;
 
 import com.dsh105.influx.Controller;
+import com.dsh105.influx.InfluxManager;
 import com.dsh105.influx.InfluxSpongeManager;
+import com.dsh105.influx.dispatch.Authorization;
+import com.dsh105.influx.dispatch.Dispatcher;
+import com.dsh105.influx.dispatch.SpongeCommandDispatcher;
 import com.google.common.base.Optional;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.util.command.CommandCallable;
 import org.spongepowered.api.util.command.CommandException;
 import org.spongepowered.api.util.command.CommandSource;
@@ -29,15 +34,23 @@ import java.util.List;
 
 public class InfluxSpongeCallable implements CommandCallable {
 
-    private final InfluxSpongeManager manager;
+    private final InfluxManager<?> manager;
     private final Controller controller;
+    private Object plugin;
+    private Game game;
+    private SpongeCommandDispatcher dispatcher;
+    private Authorization<CommandSource> authorization;
 
-    public InfluxSpongeCallable(InfluxSpongeManager manager, Controller controller) {
+    public InfluxSpongeCallable(InfluxManager<?> manager, Object plugin, Game game, SpongeCommandDispatcher dispatcher, Authorization<CommandSource> authorization, Controller controller) {
         this.manager = manager;
         this.controller = controller;
+        this.plugin = plugin;
+        this.game = game;
+        this.dispatcher = dispatcher;
+        this.authorization = authorization;
     }
 
-    public InfluxSpongeManager getManager() {
+    public InfluxManager<?> getManager() {
         return manager;
     }
 
@@ -48,12 +61,17 @@ public class InfluxSpongeCallable implements CommandCallable {
     @Override
     public boolean call(CommandSource source, String arguments, List<String> parents) throws CommandException {
         // TODO: include the parents perhaps?
-        return manager.getDispatcher().dispatch(source, arguments);
+        return dispatcher.dispatch(source, arguments);
     }
 
     @Override
     public boolean testPermission(CommandSource source) {
-        return manager.authorize(source, controller);
+        for (String permission : controller.getCommand().getPermissions()) {
+            if (!authorization.authorize(source, controller, permission)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
