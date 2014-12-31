@@ -21,7 +21,6 @@ import com.dsh105.influx.dispatch.Authorization;
 import com.dsh105.influx.dispatch.Dispatcher;
 import com.dsh105.influx.help.HelpProvider;
 import com.dsh105.influx.help.HelpProvision;
-import com.dsh105.influx.registration.RegistrationStrategy;
 import com.dsh105.influx.registration.Registry;
 import com.dsh105.influx.response.DefaultResponder;
 import com.dsh105.influx.response.MessagePurpose;
@@ -59,7 +58,7 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
             }
         });
     }
-    
+
     public CommandManager(Registry registry, String commandPrefix) {
         this(commandPrefix);
         if (registry != null) {

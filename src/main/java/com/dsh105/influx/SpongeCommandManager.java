@@ -22,7 +22,6 @@ import com.dsh105.influx.dispatch.Authorization;
 import com.dsh105.influx.dispatch.SpongeDispatcher;
 import com.dsh105.influx.help.HelpProvision;
 import com.dsh105.influx.help.SpongeHelpProvider;
-import com.dsh105.influx.registration.RegistrationStrategy;
 import com.dsh105.influx.registration.sponge.SpongeRegistry;
 import com.dsh105.influx.response.MessagePurpose;
 import com.dsh105.influx.response.SpongeResponder;
@@ -41,7 +40,7 @@ public class SpongeCommandManager extends CommandManager<CommandSource> implemen
         this(null, plugin, game);
         this.setRegistrationStrategy(new SpongeRegistry(this, plugin, game, (SpongeDispatcher) dispatcher, getAuthorization()));
     }
-    
+
     public SpongeCommandManager(SpongeRegistry registry, Object plugin, Game game) {
         super("/");
         Affirm.notNull(game);

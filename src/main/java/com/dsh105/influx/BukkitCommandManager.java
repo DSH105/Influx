@@ -21,7 +21,6 @@ import com.dsh105.influx.dispatch.Authorization;
 import com.dsh105.influx.dispatch.BukkitDispatcher;
 import com.dsh105.influx.help.BukkitHelpProvider;
 import com.dsh105.influx.help.HelpProvision;
-import com.dsh105.influx.registration.RegistrationStrategy;
 import com.dsh105.influx.registration.bukkit.BukkitRegistry;
 import com.dsh105.influx.response.BukkitResponder;
 import com.dsh105.influx.response.MessagePurpose;
