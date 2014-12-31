@@ -61,9 +61,10 @@ public class CommandManager<S> extends CommandMapping implements InfluxManager<S
 
     public CommandManager(Registry registry, String commandPrefix) {
         this(commandPrefix);
-        if (registry != null) {
-            this.setRegistrationStrategy(registry);
+        if (registry == null) {
+            registry = new Registry(this);
         }
+        this.setRegistrationStrategy(registry);
     }
 
     public CommandManager(Registry registry, String commandPrefix, String helpTitle) {

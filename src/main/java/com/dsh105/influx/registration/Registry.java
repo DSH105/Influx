@@ -31,7 +31,7 @@ public class Registry {
     private final ArrayList<String> registeredCommands = new ArrayList<>();
     private InfluxManager<?> manager;
 
-    protected Registry(InfluxManager<?> manager) {
+    public Registry(InfluxManager<?> manager) {
         this.manager = manager;
     }
 
