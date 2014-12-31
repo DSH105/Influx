@@ -23,7 +23,6 @@ import com.dsh105.influx.command.InvalidNest;
 import com.dsh105.influx.dispatch.CommandInvocationException;
 import com.dsh105.influx.help.ExpandedHelpProvider;
 import com.dsh105.influx.help.HelpProvision;
-import com.dsh105.influx.registration.RegistrationStrategy;
 import com.dsh105.influx.response.ResponseLevel;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -37,14 +36,13 @@ import static org.mockito.Mockito.when;
 
 public class CommandManagementTest {
 
-    private static InfluxManager<MockSender> manager;
     protected static MockSender mockSender;
     protected static MockSender mockChildSender;
     protected static MockResponder mockResponder;
-
+    protected static CommandSender mockCommandSender;
+    private static InfluxManager<MockSender> manager;
     private static InfluxBukkitManager bukkitManager;
     private static Plugin mockPlugin;
-    protected static CommandSender mockCommandSender;
 
     public static InfluxManager<MockSender> getManager() {
         if (manager == null) {
